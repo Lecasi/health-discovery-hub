@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import AIAssistant from '@/components/AIAssistant';
@@ -11,13 +11,28 @@ import FeaturedContent from '@/components/FeaturedContent';
 import Community from '@/components/Community';
 import StatisticsBanner from '@/components/StatisticsBanner';
 import Footer from '@/components/Footer';
+import ScrollToTop from '@/components/ScrollToTop';
+import WelcomeBanner from '@/components/WelcomeBanner';
 
 const Index = () => {
+  const [showWelcome, setShowWelcome] = useState(true);
+  
+  useEffect(() => {
+    // Auto-hide welcome banner after 5 seconds
+    const timer = setTimeout(() => {
+      setShowWelcome(false);
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
   return (
     <div className="min-h-screen bg-doctordicas-bg-light">
       <Header />
       
-      <main>
+      {showWelcome && <WelcomeBanner onClose={() => setShowWelcome(false)} />}
+      
+      <main className="pt-4">
         <SearchBar />
         <AIAssistant />
         
@@ -36,6 +51,7 @@ const Index = () => {
       </main>
       
       <Footer />
+      <ScrollToTop />
     </div>
   );
 };
