@@ -1,0 +1,69 @@
+
+import React from 'react';
+import { FileText, Heart, Utensils } from 'lucide-react';
+
+const HealthTools = () => {
+  const tools = [
+    {
+      id: 1,
+      icon: <FileText className="text-doctordicas-blue" size={24} />,
+      title: 'Interpretador de Exames',
+      description: 'Entenda seus resultados',
+      action: 'Enviar exame para análise',
+      color: 'blue'
+    },
+    {
+      id: 2,
+      icon: <Heart className="text-doctordicas-red" size={24} />,
+      title: 'Calculadora Cardíaca',
+      description: 'Avalie seu coração',
+      action: 'Calcular risco cardíaco',
+      color: 'red'
+    },
+    {
+      id: 3,
+      icon: <Utensils className="text-doctordicas-green" size={24} />,
+      title: 'Plano Nutricional',
+      description: 'Dieta personalizada',
+      action: 'Criar plano alimentar',
+      color: 'green'
+    }
+  ];
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 my-12">
+      <h2 className="section-title">Ferramentas inteligentes</h2>
+      
+      <div className="grid md:grid-cols-3 gap-6">
+        {tools.map((tool) => (
+          <div 
+            key={tool.id} 
+            className="bg-white rounded-2xl p-6 card-shadow card-hover"
+          >
+            <div className="flex items-start mb-4">
+              <div className={`p-2 rounded-lg bg-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'}-50`}>
+                {tool.icon}
+              </div>
+              <div className="ml-4">
+                <h3 className="font-semibold text-doctordicas-text-dark">
+                  {tool.title}
+                </h3>
+                <p className="text-sm text-doctordicas-text-medium">
+                  {tool.description}
+                </p>
+              </div>
+            </div>
+            
+            <button 
+              className={`w-full text-center py-2 rounded-lg border border-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} text-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} font-medium hover:bg-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} hover:text-white transition-colors`}
+            >
+              {tool.action}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default HealthTools;
