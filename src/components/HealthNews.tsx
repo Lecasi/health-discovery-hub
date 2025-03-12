@@ -1,5 +1,6 @@
 
 import React from 'react';
+import NewsSection from './NewsSection';
 
 const HealthNews = () => {
   const newsItems = [
