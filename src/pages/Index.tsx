@@ -6,7 +6,6 @@ import AIAssistant from '@/components/AIAssistant';
 import DiagnosticCard from '@/components/DiagnosticCard';
 import ConsultationCard from '@/components/ConsultationCard';
 import HealthTools from '@/components/HealthTools';
-import HealthTrends from '@/components/HealthTrends';
 import FeaturedContent from '@/components/FeaturedContent';
 import Community from '@/components/Community';
 import StatisticsBanner from '@/components/StatisticsBanner';
@@ -14,6 +13,10 @@ import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
 import WelcomeBanner from '@/components/WelcomeBanner';
 import { useToast } from "@/hooks/use-toast";
+import HealthNews from '@/components/HealthNews';
+import NutritionSection from '@/components/NutritionSection';
+import MentalHealthSection from '@/components/MentalHealthSection';
+import TrendingTopics from '@/components/TrendingTopics';
 
 const Index = () => {
   const [showWelcome, setShowWelcome] = useState(true);
@@ -70,15 +73,18 @@ const Index = () => {
         <SearchBar />
         <AIAssistant />
         
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-8">
           <div className="grid md:grid-cols-2 gap-6">
             <DiagnosticCard />
             <ConsultationCard />
           </div>
         </div>
         
+        <HealthNews />
+        <TrendingTopics />
+        <NutritionSection />
+        <MentalHealthSection />
         <HealthTools />
-        <HealthTrends />
         <FeaturedContent />
         <Community />
         <StatisticsBanner />
