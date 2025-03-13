@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
@@ -17,6 +16,7 @@ import HealthNews from '@/components/HealthNews';
 import NutritionSection from '@/components/NutritionSection';
 import MentalHealthSection from '@/components/MentalHealthSection';
 import TrendingTopics from '@/components/TrendingTopics';
+import UserInsightCollector from '@/components/UserInsightCollector';
 
 const Index = () => {
   const [showWelcome, setShowWelcome] = useState(true);
@@ -68,6 +68,8 @@ const Index = () => {
       <Header />
       
       {showWelcome && <WelcomeBanner onClose={() => setShowWelcome(false)} />}
+      
+      <UserInsightCollector />
       
       <main className="pt-4">
         <SearchBar />
