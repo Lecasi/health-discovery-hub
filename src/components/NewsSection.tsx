@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { NewsSectionProps, themeClasses } from './news/types';
 import GridLayout from './news/GridLayout';
@@ -33,10 +34,10 @@ const NewsSection = ({
         {layout === 'list' && <ListLayout items={items} />}
         
         <div className="mt-8 flex justify-center">
-          <button className="btn-secondary flex items-center gap-2 group hover:bg-doctordicas-blue hover:text-white transition-all duration-300">
+          <Link to="/artigos" className="btn-secondary flex items-center gap-2 group hover:bg-doctordicas-blue hover:text-white transition-all duration-300">
             Ver mais artigos nesta categoria
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-          </button>
+          </Link>
         </div>
       </div>
     </div>

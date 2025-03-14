@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ChevronRight, Star, Clock, Check } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const FeaturedContent = () => {
   const articles = [
@@ -114,20 +115,20 @@ const FeaturedContent = () => {
                 </div>
               </div>
               
-              <button className="w-full mt-4 btn-primary flex items-center justify-center gap-2 group-hover:gap-3 transition-all">
+              <Link to={`/artigos/${article.id}`} className="w-full mt-4 btn-primary flex items-center justify-center gap-2 group-hover:gap-3 transition-all">
                 Ler artigo completo
                 <ChevronRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </button>
+              </Link>
             </div>
           </div>
         ))}
       </div>
       
       <div className="mt-8 flex justify-center">
-        <button className="btn-secondary flex items-center gap-2 group">
+        <Link to="/artigos" className="btn-secondary flex items-center gap-2 group">
           Ver mais conteúdos especializados
           <ChevronRight size={16} className="transition-transform group-hover:translate-x-1" />
-        </button>
+        </Link>
       </div>
     </div>
   );

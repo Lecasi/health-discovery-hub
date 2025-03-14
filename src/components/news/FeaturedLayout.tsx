@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Clock, ArrowRight, Eye, MessageSquare, ThumbsUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { NewsItem, categoryColors } from './types';
 import FeaturedArticle from './FeaturedArticle';
 import SecondaryArticle from './SecondaryArticle';
@@ -26,9 +27,9 @@ const FeaturedLayout = ({ items }: FeaturedLayoutProps) => {
           <SecondaryArticle key={item.id} article={item} />
         ))}
         
-        <button className="self-end text-doctordicas-blue font-medium flex items-center gap-1 hover:gap-2 transition-all duration-300 mt-2">
+        <Link to="/artigos" className="self-end text-doctordicas-blue font-medium flex items-center gap-1 hover:gap-2 transition-all duration-300 mt-2">
           Ver mais artigos <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-        </button>
+        </Link>
       </div>
     </div>
   );
