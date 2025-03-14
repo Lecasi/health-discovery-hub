@@ -6,85 +6,85 @@ import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import GridLayout from '@/components/news/GridLayout';
-import { Article } from '@/types/article';
+import { NewsItem } from '@/components/news/types';
 
 // Sample articles for category pages
-const categoryArticles: Record<string, Article[]> = {
+const categoryArticles: Record<string, NewsItem[]> = {
   'saude-mental': [
     {
-      id: '101',
+      id: 101,
       title: 'Como lidar com a ansiedade no dia a dia',
-      summary: 'Dicas práticas para gerenciar sintomas de ansiedade e melhorar sua saúde mental.',
-      content: 'Conteúdo completo sobre ansiedade...',
+      excerpt: 'Dicas práticas para gerenciar sintomas de ansiedade e melhorar sua saúde mental.',
+      image: '/placeholder.svg',
       author: 'Dra. Mariana Silva',
-      date: '2023-09-15',
-      readTime: 8,
-      category: 'saude-mental',
-      imageUrl: '/placeholder.svg',
+      publishedAt: '2023-09-15',
+      readTime: '8 min',
+      category: 'Saúde Mental',
+      categoryColor: 'blue',
       tags: ['ansiedade', 'saúde mental', 'bem-estar']
     },
     {
-      id: '102',
+      id: 102,
       title: 'Sinais de depressão que não devem ser ignorados',
-      summary: 'Aprenda a identificar os principais sintomas de depressão e quando buscar ajuda profissional.',
-      content: 'Conteúdo completo sobre depressão...',
+      excerpt: 'Aprenda a identificar os principais sintomas de depressão e quando buscar ajuda profissional.',
+      image: '/placeholder.svg',
       author: 'Dr. Carlos Mendes',
-      date: '2023-08-22',
-      readTime: 10,
-      category: 'saude-mental',
-      imageUrl: '/placeholder.svg',
+      publishedAt: '2023-08-22',
+      readTime: '10 min',
+      category: 'Saúde Mental',
+      categoryColor: 'blue',
       tags: ['depressão', 'saúde mental', 'tratamento']
     },
     {
-      id: '103',
+      id: 103,
       title: 'Benefícios da terapia cognitivo-comportamental',
-      summary: 'Conheça como esta abordagem terapêutica pode ajudar no tratamento de diversos transtornos mentais.',
-      content: 'Conteúdo completo sobre TCC...',
+      excerpt: 'Conheça como esta abordagem terapêutica pode ajudar no tratamento de diversos transtornos mentais.',
+      image: '/placeholder.svg',
       author: 'Dra. Patrícia Souza',
-      date: '2023-07-30',
-      readTime: 7,
-      category: 'saude-mental',
-      imageUrl: '/placeholder.svg',
+      publishedAt: '2023-07-30',
+      readTime: '7 min',
+      category: 'Saúde Mental',
+      categoryColor: 'blue',
       tags: ['terapia', 'TCC', 'tratamento', 'saúde mental']
     }
   ],
   'nutricao': [
     {
-      id: '201',
+      id: 201,
       title: 'Alimentos que fortalecem o sistema imunológico',
-      summary: 'Descubra quais alimentos podem ajudar a melhorar suas defesas naturais.',
-      content: 'Conteúdo completo sobre alimentos e imunidade...',
+      excerpt: 'Descubra quais alimentos podem ajudar a melhorar suas defesas naturais.',
+      image: '/placeholder.svg',
       author: 'Dra. Amanda Nunes',
-      date: '2023-09-10',
-      readTime: 6,
-      category: 'nutricao',
-      imageUrl: '/placeholder.svg',
+      publishedAt: '2023-09-10',
+      readTime: '6 min',
+      category: 'Nutrição',
+      categoryColor: 'green',
       tags: ['nutrição', 'imunidade', 'alimentação saudável']
     },
     {
-      id: '202',
+      id: 202,
       title: 'Mitos e verdades sobre dietas low-carb',
-      summary: 'Um guia baseado em evidências sobre os prós e contras das dietas baixas em carboidratos.',
-      content: 'Conteúdo completo sobre dietas low-carb...',
+      excerpt: 'Um guia baseado em evidências sobre os prós e contras das dietas baixas em carboidratos.',
+      image: '/placeholder.svg',
       author: 'Dr. Ricardo Lima',
-      date: '2023-08-18',
-      readTime: 9,
-      category: 'nutricao',
-      imageUrl: '/placeholder.svg',
+      publishedAt: '2023-08-18',
+      readTime: '9 min',
+      category: 'Nutrição',
+      categoryColor: 'green',
       tags: ['dietas', 'low-carb', 'emagrecimento', 'nutrição']
     }
   ],
   'exercicios': [
     {
-      id: '301',
+      id: 301,
       title: 'Como começar a praticar exercícios depois dos 40',
-      summary: 'Guia completo para iniciar atividades físicas com segurança após os 40 anos.',
-      content: 'Conteúdo completo sobre exercícios após os 40...',
+      excerpt: 'Guia completo para iniciar atividades físicas com segurança após os 40 anos.',
+      image: '/placeholder.svg',
       author: 'Dr. Fernando Costa',
-      date: '2023-09-05',
-      readTime: 8,
-      category: 'exercicios',
-      imageUrl: '/placeholder.svg',
+      publishedAt: '2023-09-05',
+      readTime: '8 min',
+      category: 'Exercícios Físicos',
+      categoryColor: 'yellow',
       tags: ['exercícios', 'idade', 'saúde', 'atividade física']
     }
   ],
@@ -103,7 +103,7 @@ const categoryNames: Record<string, string> = {
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
-  const articles = categoryId ? (categoryArticles[categoryId] || []) : [];
+  const items = categoryId ? (categoryArticles[categoryId] || []) : [];
   const categoryName = categoryId ? (categoryNames[categoryId] || categoryId) : '';
 
   return (
@@ -121,8 +121,8 @@ const CategoryPage = () => {
 
         <Separator className="my-6" />
 
-        {articles.length > 0 ? (
-          <GridLayout articles={articles} />
+        {items.length > 0 ? (
+          <GridLayout items={items} />
         ) : (
           <div className="text-center py-12">
             <h2 className="text-xl font-medium text-doctordicas-text-medium">
