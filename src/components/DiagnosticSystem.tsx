@@ -1,223 +1,354 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Search, ChevronRight, Stethoscope, 
-  HeartPulse, Thermometer, Pill, Brain, 
-  Lungs, Bone, Eye
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
+import { Stethoscope, Heart, Brain, Thermometer, Activity } from 'lucide-react';
 
-// Define the diagnostic category type
-interface DiagnosticCategory {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ElementType;
-  commonSymptoms: string[];
-}
-
-// Define the diagnostic categories
-const diagnosticCategories: DiagnosticCategory[] = [
-  {
-    id: 'cardiovascular',
-    name: 'Cardiovascular',
-    description: 'Problemas relacionados ao coração e sistema circulatório',
-    icon: HeartPulse,
-    commonSymptoms: ['Dor no peito', 'Falta de ar', 'Palpitações', 'Desmaios']
-  },
+const symptomGroups = [
   {
     id: 'respiratory',
-    name: 'Respiratório',
-    description: 'Problemas relacionados aos pulmões e vias respiratórias',
-    icon: Lungs,
-    commonSymptoms: ['Tosse', 'Falta de ar', 'Chiado no peito', 'Dor ao respirar']
+    title: 'Sintomas Respiratórios',
+    icon: <Stethoscope className="h-5 w-5" />,
+    symptoms: [
+      { id: 'cough', label: 'Tosse' },
+      { id: 'shortnessOfBreath', label: 'Falta de ar' },
+      { id: 'soreThroat', label: 'Dor de garganta' },
+      { id: 'nasalCongestion', label: 'Congestão nasal' },
+      { id: 'runnyNose', label: 'Coriza' },
+    ]
+  },
+  {
+    id: 'cardiac',
+    title: 'Sintomas Cardíacos',
+    icon: <Heart className="h-5 w-5" />,
+    symptoms: [
+      { id: 'chestPain', label: 'Dor no peito' },
+      { id: 'palpitations', label: 'Palpitações' },
+      { id: 'dizziness', label: 'Tontura' },
+      { id: 'fainting', label: 'Desmaio ou quase desmaio' },
+    ]
+  },
+  {
+    id: 'neurological',
+    title: 'Sintomas Neurológicos',
+    icon: <Brain className="h-5 w-5" />,
+    symptoms: [
+      { id: 'headache', label: 'Dor de cabeça' },
+      { id: 'confusion', label: 'Confusão mental' },
+      { id: 'memoryIssues', label: 'Problemas de memória' },
+      { id: 'difficultyConcentrating', label: 'Dificuldade de concentração' },
+    ]
+  },
+  {
+    id: 'general',
+    title: 'Sintomas Gerais',
+    icon: <Thermometer className="h-5 w-5" />,
+    symptoms: [
+      { id: 'fever', label: 'Febre' },
+      { id: 'fatigue', label: 'Fadiga' },
+      { id: 'bodyAches', label: 'Dores no corpo' },
+      { id: 'chills', label: 'Calafrios' },
+      { id: 'weightLoss', label: 'Perda de peso inexplicada' },
+    ]
   },
   {
     id: 'digestive',
-    name: 'Digestivo',
-    description: 'Problemas relacionados ao sistema digestivo',
-    icon: Pill,
-    commonSymptoms: ['Dor abdominal', 'Náusea', 'Vômito', 'Diarreia', 'Constipação']
-  },
-  {
-    id: 'nervous',
-    name: 'Sistema Nervoso',
-    description: 'Problemas relacionados ao cérebro e sistema nervoso',
-    icon: Brain,
-    commonSymptoms: ['Dor de cabeça', 'Tontura', 'Formigamento', 'Fraqueza', 'Confusão']
-  },
-  {
-    id: 'musculoskeletal',
-    name: 'Músculo-Esquelético',
-    description: 'Problemas relacionados aos músculos, ossos e articulações',
-    icon: Bone,
-    commonSymptoms: ['Dor nas articulações', 'Inchaço', 'Rigidez', 'Dificuldade para mover']
-  },
-  {
-    id: 'vision',
-    name: 'Visão',
-    description: 'Problemas relacionados aos olhos e visão',
-    icon: Eye,
-    commonSymptoms: ['Visão borrada', 'Dor nos olhos', 'Olho seco', 'Ver flashes de luz']
-  },
+    title: 'Sintomas Digestivos',
+    icon: <Activity className="h-5 w-5" />,
+    symptoms: [
+      { id: 'nausea', label: 'Náusea' },
+      { id: 'vomiting', label: 'Vômito' },
+      { id: 'diarrhea', label: 'Diarreia' },
+      { id: 'constipation', label: 'Constipação' },
+      { id: 'abdominalPain', label: 'Dor abdominal' },
+    ]
+  }
 ];
 
 const DiagnosticSystem = () => {
-  const [selectedCategory, setSelectedCategory] = useState<DiagnosticCategory | null>(null);
-  const [symptoms, setSymptoms] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
+  const [symptomsIntensity, setSymptomsIntensity] = useState<{[key: string]: number}>({});
+  const [symptomsFrequency, setSymptomsFrequency] = useState<{[key: string]: string}>({});
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
+  const [medicalHistory, setMedicalHistory] = useState<string[]>([]);
 
-  const handleCategorySelect = (category: DiagnosticCategory) => {
-    setSelectedCategory(category);
-  };
-
-  const handleDiagnosticSubmit = () => {
-    if (!selectedCategory || !symptoms.trim()) {
-      toast({
-        title: "Informações incompletas",
-        description: "Por favor, selecione uma categoria e descreva seus sintomas",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    // Simulate diagnostic processing
-    setTimeout(() => {
-      setIsSubmitting(false);
-      
-      // Store diagnostic in localStorage (in a real app, this would go to a database)
-      const diagnosticData = {
-        id: `diag-${Date.now()}`,
-        categoryId: selectedCategory.id,
-        categoryName: selectedCategory.name,
-        symptoms: symptoms,
-        date: new Date().toISOString(),
-      };
-      
-      const existingDiagnostics = JSON.parse(localStorage.getItem('diagnostics') || '[]');
-      localStorage.setItem('diagnostics', JSON.stringify([...existingDiagnostics, diagnosticData]));
-      
-      toast({
-        title: "Diagnóstico iniciado",
-        description: "Seus sintomas estão sendo analisados pelo nosso sistema",
-      });
-      
-      // Navigate to results page (would be implemented in a real system)
-      navigate(`/diagnostico/resultados/${diagnosticData.id}`);
-    }, 2000);
-  };
-
-  return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col gap-6">
-        <div>
-          <h1 className="text-2xl font-bold text-doctordicas-text-dark mb-2">Sistema de Diagnóstico</h1>
-          <p className="text-doctordicas-text-medium">
-            Nosso sistema de IA analisa seus sintomas e fornece orientações preliminares sobre possíveis condições.
-            Lembre-se que este não é um substituto para consulta médica profissional.
-          </p>
-        </div>
+  const handleSymptomToggle = (symptomId: string) => {
+    setSelectedSymptoms(prev => {
+      if (prev.includes(symptomId)) {
+        const newSelectedSymptoms = prev.filter(id => id !== symptomId);
+        // Also remove intensity and frequency
+        const newIntensity = { ...symptomsIntensity };
+        delete newIntensity[symptomId];
+        setSymptomsIntensity(newIntensity);
         
-        {!selectedCategory ? (
-          <div>
-            <h2 className="text-xl font-semibold text-doctordicas-text-dark mb-4">Selecione a categoria de sintomas:</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {diagnosticCategories.map((category) => (
-                <Card 
-                  key={category.id} 
-                  className="hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => handleCategorySelect(category)}
-                >
-                  <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                    <div className="bg-doctordicas-blue-light p-2 rounded-full">
-                      <category.icon className="text-doctordicas-blue h-6 w-6" />
+        const newFrequency = { ...symptomsFrequency };
+        delete newFrequency[symptomId];
+        setSymptomsFrequency(newFrequency);
+        
+        return newSelectedSymptoms;
+      } else {
+        return [...prev, symptomId];
+      }
+    });
+  };
+
+  const handleIntensityChange = (symptomId: string, value: number[]) => {
+    setSymptomsIntensity(prev => ({
+      ...prev,
+      [symptomId]: value[0]
+    }));
+  };
+
+  const handleFrequencyChange = (symptomId: string, value: string) => {
+    setSymptomsFrequency(prev => ({
+      ...prev,
+      [symptomId]: value
+    }));
+  };
+
+  const handleNextStep = () => {
+    if (currentStep < 3) {
+      setCurrentStep(prev => prev + 1);
+    } else {
+      // Submit the diagnostic information
+      const diagnosisId = `diag-${Date.now()}`;
+      navigate(`/diagnostico/resultados/${diagnosisId}`);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(prev => prev - 1);
+    }
+  };
+
+  const handleHistoryToggle = (condition: string) => {
+    setMedicalHistory(prev => {
+      if (prev.includes(condition)) {
+        return prev.filter(c => c !== condition);
+      } else {
+        return [...prev, condition];
+      }
+    });
+  };
+  
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <Card className="max-w-4xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl">Sistema de Diagnóstico Preliminar</CardTitle>
+          <CardDescription>
+            Esta ferramenta oferece uma análise preliminar com base nos seus sintomas. 
+            Não substitui uma consulta médica profissional.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          {currentStep === 1 && (
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium">Selecione seus sintomas</h3>
+              
+              <div className="space-y-6">
+                {symptomGroups.map(group => (
+                  <div key={group.id} className="border rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      {group.icon}
+                      <h4 className="font-medium">{group.title}</h4>
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">{category.name}</CardTitle>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {group.symptoms.map(symptom => (
+                        <div key={symptom.id} className="flex items-start space-x-2">
+                          <Checkbox
+                            id={symptom.id}
+                            checked={selectedSymptoms.includes(symptom.id)}
+                            onCheckedChange={() => handleSymptomToggle(symptom.id)}
+                          />
+                          <Label
+                            htmlFor={symptom.id}
+                            className="text-sm font-normal cursor-pointer"
+                          >
+                            {symptom.label}
+                          </Label>
+                        </div>
+                      ))}
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-sm">{category.description}</CardDescription>
-                  </CardContent>
-                  <CardFooter className="pt-0 border-t flex justify-between items-center">
-                    <div className="text-xs text-doctordicas-text-medium">Sintomas comuns</div>
-                    <ChevronRight className="h-4 w-4 text-doctordicas-text-medium" />
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <Button variant="outline" onClick={() => setSelectedCategory(null)}>
-                Voltar
-              </Button>
-              <h2 className="text-xl font-semibold text-doctordicas-text-dark">
-                {selectedCategory.name}
-              </h2>
-            </div>
-            
-            <div className="mb-6">
-              <div className="text-sm text-doctordicas-text-medium mb-2">Sintomas comuns nesta categoria:</div>
-              <div className="flex flex-wrap gap-2">
-                {selectedCategory.commonSymptoms.map((symptom, index) => (
-                  <div 
-                    key={index} 
-                    className="bg-doctordicas-blue-light text-doctordicas-blue px-3 py-1 rounded-full text-sm"
-                  >
-                    {symptom}
                   </div>
                 ))}
               </div>
             </div>
-            
-            <div className="mb-6">
-              <label htmlFor="symptoms" className="block text-sm font-medium text-doctordicas-text-dark mb-2">
-                Descreva detalhadamente seus sintomas:
-              </label>
-              <textarea
-                id="symptoms"
-                rows={6}
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-doctordicas-blue focus:border-doctordicas-blue"
-                placeholder="Exemplo: Tenho sentido dor no peito que piora quando respiro fundo, começou há 3 dias e está acompanhada de uma leve tosse seca..."
-                value={symptoms}
-                onChange={(e) => setSymptoms(e.target.value)}
-              ></textarea>
-              <p className="text-xs text-doctordicas-text-medium mt-1">
-                Quanto mais detalhes você fornecer, mais precisa será nossa análise.
-              </p>
+          )}
+
+          {currentStep === 2 && selectedSymptoms.length > 0 && (
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium">Detalhe seus sintomas</h3>
+              
+              <div className="space-y-6">
+                {selectedSymptoms.map(symptomId => {
+                  const symptomGroup = symptomGroups.find(group => 
+                    group.symptoms.some(s => s.id === symptomId)
+                  );
+                  const symptom = symptomGroup?.symptoms.find(s => s.id === symptomId);
+                  
+                  return (
+                    <div key={symptomId} className="border rounded-lg p-4">
+                      <h4 className="font-medium mb-4">{symptom?.label}</h4>
+                      
+                      <div className="space-y-6">
+                        <div className="space-y-3">
+                          <Label>Intensidade</Label>
+                          <div className="px-1">
+                            <Slider 
+                              defaultValue={[symptomsIntensity[symptomId] || 5]} 
+                              max={10} 
+                              step={1}
+                              onValueChange={(value) => handleIntensityChange(symptomId, value)}
+                            />
+                            <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+                              <span>Leve</span>
+                              <span>Moderada</span>
+                              <span>Severa</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <Label>Frequência</Label>
+                          <RadioGroup 
+                            defaultValue={symptomsFrequency[symptomId] || "occasional"} 
+                            onValueChange={(value) => handleFrequencyChange(symptomId, value)}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="rarely" id={`${symptomId}-rarely`} />
+                              <Label htmlFor={`${symptomId}-rarely`}>Raramente</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="occasional" id={`${symptomId}-occasional`} />
+                              <Label htmlFor={`${symptomId}-occasional`}>Ocasionalmente</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="frequent" id={`${symptomId}-frequent`} />
+                              <Label htmlFor={`${symptomId}-frequent`}>Frequentemente</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="constant" id={`${symptomId}-constant`} />
+                              <Label htmlFor={`${symptomId}-constant`}>Constantemente</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            
-            <div className="flex justify-end">
-              <Button 
-                className="flex items-center gap-2" 
-                onClick={handleDiagnosticSubmit}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin"></div>
-                    <span>Processando...</span>
-                  </>
-                ) : (
-                  <>
-                    <Stethoscope className="h-4 w-4" />
-                    <span>Iniciar Diagnóstico</span>
-                  </>
-                )}
-              </Button>
+          )}
+
+          {currentStep === 3 && (
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium">Informações Pessoais</h3>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="age">Idade</Label>
+                    <select 
+                      id="age" 
+                      className="w-full p-2 border rounded-md" 
+                      value={age}
+                      onChange={(e) => setAge(e.target.value)}
+                    >
+                      <option value="">Selecione</option>
+                      <option value="0-12">0-12 anos</option>
+                      <option value="13-18">13-18 anos</option>
+                      <option value="19-29">19-29 anos</option>
+                      <option value="30-39">30-39 anos</option>
+                      <option value="40-49">40-49 anos</option>
+                      <option value="50-59">50-59 anos</option>
+                      <option value="60-69">60-69 anos</option>
+                      <option value="70+">70+ anos</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">Gênero</Label>
+                    <select 
+                      id="gender" 
+                      className="w-full p-2 border rounded-md"
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                    >
+                      <option value="">Selecione</option>
+                      <option value="male">Masculino</option>
+                      <option value="female">Feminino</option>
+                      <option value="other">Outro</option>
+                      <option value="prefer-not-to-say">Prefiro não informar</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3">
+                  <Label>Histórico Médico (selecione todas que se aplicam)</Label>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {[
+                      { id: 'diabetes', label: 'Diabetes' },
+                      { id: 'hypertension', label: 'Hipertensão' },
+                      { id: 'heartDisease', label: 'Doença cardíaca' },
+                      { id: 'asthma', label: 'Asma' },
+                      { id: 'cancer', label: 'Câncer' },
+                      { id: 'autoimmune', label: 'Doença autoimune' },
+                      { id: 'thyroid', label: 'Problemas de tireoide' },
+                      { id: 'depression', label: 'Depressão ou ansiedade' }
+                    ].map(condition => (
+                      <div key={condition.id} className="flex items-start space-x-2">
+                        <Checkbox
+                          id={condition.id}
+                          checked={medicalHistory.includes(condition.id)}
+                          onCheckedChange={() => handleHistoryToggle(condition.id)}
+                        />
+                        <Label
+                          htmlFor={condition.id}
+                          className="text-sm font-normal cursor-pointer"
+                        >
+                          {condition.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </CardContent>
+
+        <CardFooter className="flex justify-between">
+          <Button
+            variant="outline"
+            onClick={handlePrevStep}
+            disabled={currentStep === 1}
+          >
+            Voltar
+          </Button>
+          
+          <Button
+            onClick={handleNextStep}
+            disabled={currentStep === 1 && selectedSymptoms.length === 0}
+          >
+            {currentStep < 3 ? 'Próximo' : 'Finalizar'}
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
