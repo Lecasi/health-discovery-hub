@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bot, ChevronRight, Send, Sparkles, MessageSquare, Loader } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from 'react-router-dom';
 
 const AIAssistant = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -10,6 +11,7 @@ const AIAssistant = () => {
   const [activeUsers, setActiveUsers] = useState(476);
   const [pulseEffect, setPulseEffect] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const suggestionChips = [
     { id: 1, text: 'Dor de cabeça', isNew: false },
@@ -47,12 +49,16 @@ const AIAssistant = () => {
     // Simulate AI typing response
     setTimeout(() => {
       setIsTyping(false);
+      
+      // Navigate to the consultation page with the query
+      navigate(`/consulta?query=${encodeURIComponent(text)}`);
+      
       toast({
-        title: "Resposta pronta",
-        description: `Sua pergunta sobre "${text}" foi respondida`,
+        title: "Consulta iniciada",
+        description: `Sua consulta sobre "${text}" foi iniciada`,
         duration: 3000
       });
-    }, 2000);
+    }, 1000);
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -63,12 +69,16 @@ const AIAssistant = () => {
     // Simulate AI typing response
     setTimeout(() => {
       setIsTyping(false);
+      
+      // Navigate to the consultation page with the query
+      navigate(`/consulta?query=${encodeURIComponent(query)}`);
+      
       toast({
-        title: "Resposta pronta",
-        description: "Sua pergunta foi respondida pelo nosso assistente",
+        title: "Consulta iniciada",
+        description: "Sua consulta foi iniciada",
         duration: 3000
       });
-    }, 2000);
+    }, 1000);
   };
 
   return (

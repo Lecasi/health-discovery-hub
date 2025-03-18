@@ -1,13 +1,11 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -16,11 +14,11 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 142.1 76.2% 36.3%;
-    --secondary-foreground: 355.7 100% 97.3%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -33,9 +31,9 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --ring: 222.2 84% 4.9%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
   }
 
   .dark {
@@ -48,7 +46,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -73,239 +71,76 @@
   * {
     @apply border-border;
   }
-
-  html {
-    @apply scroll-smooth;
-  }
-
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground;
   }
 }
 
 @layer components {
   .card-shadow {
-    @apply shadow-[0_4px_16px_0_rgba(0,0,0,0.06)];
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
   }
   
-  .card-hover {
-    @apply transition-all duration-300 hover:shadow-[0_8px_24px_0_rgba(0,0,0,0.08)] hover:-translate-y-1;
-  }
-  
-  .glass-effect {
-    @apply backdrop-blur-sm bg-white/90 border border-white/20;
+  .story-link * {
+    @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
   }
   
   .chip {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-colors;
+    @apply rounded-full px-2.5 py-1 text-sm font-medium cursor-pointer flex items-center;
   }
   
-  .btn-primary {
-    @apply bg-doctordicas-blue text-white hover:bg-blue-600 transition-colors py-2 px-4 rounded-lg font-medium;
+  /* Typing indicator animation */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
   }
   
-  .btn-secondary {
-    @apply bg-white text-doctordicas-blue border border-doctordicas-blue hover:bg-doctordicas-blue hover:text-white transition-colors py-2 px-4 rounded-lg font-medium;
+  .typing-indicator span {
+    height: 8px;
+    width: 8px;
+    margin: 0 2px;
+    background-color: #b0b0b0;
+    border-radius: 50%;
+    display: inline-block;
+    opacity: 0.4;
   }
   
-  .btn-green {
-    @apply bg-doctordicas-green text-white hover:bg-green-600 transition-colors py-2 px-4 rounded-lg font-medium;
+  .typing-indicator span:nth-child(1) {
+    animation: bounce 1s infinite 0.1s;
   }
   
-  .section-title {
-    @apply text-2xl font-semibold text-doctordicas-text-dark mb-6;
+  .typing-indicator span:nth-child(2) {
+    animation: bounce 1s infinite 0.3s;
   }
   
-  .badge {
-    @apply inline-block px-2 py-0.5 text-xs font-medium rounded-full;
+  .typing-indicator span:nth-child(3) {
+    animation: bounce 1s infinite 0.5s;
   }
   
-  .badge-blue {
-    @apply badge bg-blue-100 text-doctordicas-blue;
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+    50% {
+      transform: translateY(-4px);
+      opacity: 1;
+    }
   }
   
-  .badge-green {
-    @apply badge bg-green-100 text-doctordicas-green;
+  /* Animation for fade in */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
   }
   
-  .badge-yellow {
-    @apply badge bg-yellow-100 text-doctordicas-yellow;
-  }
-  
-  .badge-red {
-    @apply badge bg-red-100 text-doctordicas-red;
-  }
-  
-  .shimmer {
-    @apply relative overflow-hidden bg-gray-200 animate-pulse;
-  }
-  
-  .shimmer::after {
-    @apply absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent;
-    content: '';
-    animation: shimmer 2s infinite;
-  }
-  
-  .verified-badge {
-    @apply inline-flex items-center gap-1 text-xs font-medium text-doctordicas-blue;
-  }
-}
-
-/* Custom Animations */
-@keyframes shimmer {
-  100% {
-    transform: translateX(200%);
-  }
-}
-
-.slide-enter {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.slide-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 300ms, transform 300ms;
-}
-
-.slide-exit {
-  opacity: 1;
-}
-
-.slide-exit-active {
-  opacity: 0;
-  transform: translateY(-20px);
-  transition: opacity 300ms, transform 300ms;
-}
-
-/* Added New Animations */
-.ripple {
-  position: relative;
-  overflow: hidden;
-}
-
-.ripple::after {
-  content: "";
-  display: block;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
-  background-repeat: no-repeat;
-  background-position: 50%;
-  transform: scale(10, 10);
-  opacity: 0;
-  transition: transform 0.5s, opacity 1s;
-}
-
-.ripple:active::after {
-  transform: scale(0, 0);
-  opacity: 0.3;
-  transition: 0s;
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-.animate-float {
-  animation: float 5s ease-in-out infinite;
-}
-
-@keyframes gradientBg {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient {
-  background: linear-gradient(270deg, var(--tw-gradient-stops));
-  background-size: 200% 200%;
-  animation: gradientBg 3s ease infinite;
-}
-
-/* Added Micro-interactions */
-.btn-scale-on-hover {
-  transition: transform 0.2s;
-}
-
-.btn-scale-on-hover:hover {
-  transform: scale(1.05);
-}
-
-.shake-on-hover:hover {
-  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-@keyframes shake {
-  10%, 90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-  20%, 80% {
-    transform: translate3d(2px, 0, 0);
-  }
-  30%, 50%, 70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-  40%, 60% {
-    transform: translate3d(4px, 0, 0);
-  }
-}
-
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: skeletonLoading 1.5s infinite;
-}
-
-@keyframes skeletonLoading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-.focus-indicator {
-  transition: outline-color 0.3s ease;
-}
-
-.focus-indicator:focus-visible {
-  outline: 2px solid rgba(37, 99, 235, 0.5);
-  outline-offset: 2px;
-}
-
-.pulse-on-hover:hover {
-  animation: pulse-animation 1.5s infinite;
-}
-
-@keyframes pulse-animation {
-  0% {
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
