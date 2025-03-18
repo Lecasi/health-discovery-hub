@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -67,7 +66,27 @@ const DiagnosticFlow = () => {
     'Cabeça', 'Peito', 'Abdômen', 'Costas',
     'Braços', 'Pernas', 'Geral'
   ];
-  
+
+  // Check for stored diagnostic data from homepage when component mounts
+  useEffect(() => {
+    const storedSymptoms = localStorage.getItem('diagnosticSymptoms');
+    const storedBodyPart = localStorage.getItem('diagnosticBodyPart');
+    
+    if (storedSymptoms && storedBodyPart) {
+      setSymptoms(storedSymptoms);
+      setSelectedBodyPart(storedBodyPart);
+      
+      // Clear localStorage after retrieving the data
+      localStorage.removeItem('diagnosticSymptoms');
+      localStorage.removeItem('diagnosticBodyPart');
+      
+      // Auto-start diagnosis if we have data from homepage
+      setTimeout(() => {
+        handleDiagnose();
+      }, 500);
+    }
+  }, []);
+
   // Generate dynamic processing messages based on body part
   useEffect(() => {
     if (currentStep === 'processing') {

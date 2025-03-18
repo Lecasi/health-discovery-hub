@@ -1,4 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import AIAssistant from '@/components/AIAssistant';
@@ -79,6 +81,14 @@ const Index = () => {
           <div className="grid md:grid-cols-2 gap-6">
             <DiagnosticCard />
             <ConsultationCard />
+          </div>
+          <div className="text-center mt-4">
+            <Link 
+              to="/diagnostico" 
+              className="inline-flex items-center text-doctordicas-blue hover:text-blue-700 transition-colors"
+            >
+              Ver sistema de diagnóstico completo →
+            </Link>
           </div>
         </div>
         

@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, AlertCircle, Search, ShieldCheck, RotateCcw } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const DiagnosticCard = () => {
   const [selectedBodyPart, setSelectedBodyPart] = useState('');
@@ -11,6 +11,7 @@ const DiagnosticCard = () => {
   const [diagnosesCount, setDiagnosesCount] = useState(12567);
   const [isHovered, setIsHovered] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const bodyParts = [
     'Cabeça', 'Peito', 'Abdômen', 'Costas',
@@ -38,27 +39,24 @@ const DiagnosticCard = () => {
     setIsSubmitting(true);
     setFeedback(null);
     
-    // Simulate API call
+    // Show feedback
     setTimeout(() => {
-      console.log('Diagnosing:', { selectedBodyPart, symptoms });
       setIsSubmitting(false);
       setFeedback({
         type: 'success',
-        message: 'Diagnóstico iniciado! Estamos analisando seus sintomas.'
+        message: 'Redirecionando para o sistema de diagnóstico...'
       });
       
-      // Show toast notification
-      toast({
-        title: "Diagnóstico iniciado",
-        description: "Nossa IA está analisando seus sintomas agora.",
-        duration: 5000,
-      });
+      // Store the input in localStorage to use it on the diagnosis page
+      localStorage.setItem('diagnosticSymptoms', symptoms);
+      localStorage.setItem('diagnosticBodyPart', selectedBodyPart);
       
-      // Clear feedback after 3 seconds
+      // Redirect to diagnostic page
       setTimeout(() => {
-        setFeedback(null);
-      }, 3000);
-    }, 1500);
+        navigate('/diagnostico');
+      }, 1000);
+      
+    }, 1000);
   };
   
   const resetForm = () => {
