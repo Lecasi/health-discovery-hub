@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Loader2, Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import ExamResults from './ExamResults';
 
 type FileWithPreview = {
   file: File;
@@ -165,12 +166,27 @@ const ExamInterpreter = () => {
               reference: "<130 mg/dL",
               status: "high",
               explanation: "Seu LDL (conhecido como 'colesterol ruim') está elevado. Reduzir o consumo de gorduras saturadas e aumentar a atividade física pode ajudar."
+            },
+            {
+              name: "Colesterol HDL",
+              value: "52 mg/dL",
+              reference: ">40 mg/dL",
+              status: "normal",
+              explanation: "Seu HDL (conhecido como 'colesterol bom') está em um nível adequado."
+            },
+            {
+              name: "Triglicerídeos",
+              value: "120 mg/dL",
+              reference: "<150 mg/dL",
+              status: "normal",
+              explanation: "Seus triglicerídeos estão dentro dos valores de referência."
             }
           ],
           recommendations: [
             "Reduzir o consumo de carboidratos refinados e açúcares",
             "Aumentar a atividade física para pelo menos 150 minutos por semana",
-            "Considerar consulta com endocrinologista para avaliação da glicose elevada"
+            "Considerar consulta com endocrinologista para avaliação da glicose elevada",
+            "Aumentar o consumo de fibras e ômega-3"
           ]
         };
         
@@ -184,6 +200,36 @@ const ExamInterpreter = () => {
       }, 3000);
     }, 2000);
   };
+
+  const renderSimpleUploadButton = () => (
+    <div className="text-center py-10">
+      <div className="mb-4">
+        <div className="rounded-full bg-blue-50 w-16 h-16 flex items-center justify-center mx-auto mb-2">
+          <FileText className="h-8 w-8 text-doctordicas-blue" />
+        </div>
+        <h3 className="text-lg font-semibold text-doctordicas-text-dark mb-2">
+          Interpretador de Exames
+        </h3>
+        <p className="text-doctordicas-text-medium mb-6">
+          Entenda seus resultados
+        </p>
+      </div>
+      <Button 
+        onClick={() => fileInputRef.current?.click()}
+        className="w-full max-w-md bg-doctordicas-blue"
+      >
+        Enviar exame para análise
+      </Button>
+      <input
+        type="file"
+        multiple
+        onChange={handleFileChange}
+        className="hidden"
+        accept=".pdf,.jpg,.jpeg,.png"
+        ref={fileInputRef}
+      />
+    </div>
+  );
 
   const renderUploadArea = () => (
     <div 
@@ -329,77 +375,19 @@ const ExamInterpreter = () => {
     </div>
   );
 
-  const renderResults = () => (
-    <div className="mt-6 p-6 border rounded-lg bg-white">
-      <div className="mb-6">
-        <div className="flex items-center justify-center mb-4">
-          <CheckCircle className="h-8 w-8 text-green-500 mr-2" />
-          <h3 className="text-xl font-semibold text-doctordicas-text-dark">
-            Interpretação concluída
-          </h3>
-        </div>
-        <p className="text-doctordicas-text-medium text-center">
-          {results.summary}
-        </p>
-      </div>
-      
-      <div className="space-y-4 mb-6">
-        <h4 className="font-medium text-lg text-doctordicas-text-dark">Parâmetros analisados</h4>
-        <div className="space-y-4">
-          {results.parameters.map((param: any, index: number) => (
-            <div key={index} className="p-4 rounded-lg border">
-              <div className="flex justify-between items-center mb-2">
-                <h5 className="font-medium text-doctordicas-text-dark">{param.name}</h5>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  param.status === 'high' 
-                    ? 'bg-red-100 text-red-800' 
-                    : param.status === 'low'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-green-100 text-green-800'
-                }`}>
-                  {param.status === 'high' 
-                    ? 'Elevado' 
-                    : param.status === 'low'
-                      ? 'Baixo'
-                      : 'Normal'}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm mb-2">
-                <span>Seu resultado: <strong>{param.value}</strong></span>
-                <span>Referência: {param.reference}</span>
-              </div>
-              <p className="text-sm text-doctordicas-text-medium">{param.explanation}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="space-y-4">
-        <h4 className="font-medium text-lg text-doctordicas-text-dark">Recomendações</h4>
-        <ul className="space-y-2 list-disc list-inside text-doctordicas-text-medium">
-          {results.recommendations.map((rec: string, index: number) => (
-            <li key={index}>{rec}</li>
-          ))}
-        </ul>
-      </div>
-      
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg flex items-start">
-        <AlertCircle className="h-5 w-5 text-doctordicas-blue mr-2 flex-shrink-0 mt-0.5" />
-        <p className="text-sm text-doctordicas-text-medium">
-          <strong>Importante:</strong> Esta interpretação é uma análise automatizada e não substitui a avaliação de um profissional de saúde. Sempre consulte seu médico para entender completamente seus resultados.
-        </p>
-      </div>
-    </div>
-  );
-
   return (
     <div className="container mx-auto px-4 max-w-3xl mb-12">
       <Card className="shadow-md">
         <CardContent className="p-6">
-          {status === 'idle' && renderUploadArea()}
-          {files.length > 0 && status === 'idle' && renderFilesList()}
+          {files.length === 0 && status === 'idle' ? renderSimpleUploadButton() : null}
+          {files.length > 0 && status === 'idle' ? (
+            <>
+              {renderUploadArea()}
+              {renderFilesList()}
+            </>
+          ) : null}
           {(status === 'uploading' || status === 'processing') && renderProcessingStatus()}
-          {status === 'complete' && renderResults()}
+          {status === 'complete' && <ExamResults results={results} />}
         </CardContent>
       </Card>
     </div>

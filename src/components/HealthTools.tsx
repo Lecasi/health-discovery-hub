@@ -1,8 +1,11 @@
 
 import React from 'react';
 import { FileText, Heart, Utensils } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const HealthTools = () => {
+  const navigate = useNavigate();
+  
   const tools = [
     {
       id: 1,
@@ -10,6 +13,7 @@ const HealthTools = () => {
       title: 'Interpretador de Exames',
       description: 'Entenda seus resultados',
       action: 'Enviar exame para análise',
+      path: '/exames',
       color: 'blue'
     },
     {
@@ -18,6 +22,7 @@ const HealthTools = () => {
       title: 'Calculadora Cardíaca',
       description: 'Avalie seu coração',
       action: 'Calcular risco cardíaco',
+      path: '#',
       color: 'red'
     },
     {
@@ -26,9 +31,16 @@ const HealthTools = () => {
       title: 'Plano Nutricional',
       description: 'Dieta personalizada',
       action: 'Criar plano alimentar',
+      path: '#',
       color: 'green'
     }
   ];
+
+  const handleToolClick = (path: string) => {
+    if (path !== '#') {
+      navigate(path);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 my-12">
@@ -55,6 +67,7 @@ const HealthTools = () => {
             </div>
             
             <button 
+              onClick={() => handleToolClick(tool.path)}
               className={`w-full text-center py-2 rounded-lg border border-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} text-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} font-medium hover:bg-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} hover:text-white transition-colors`}
             >
               {tool.action}
