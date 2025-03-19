@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -17,12 +18,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Menu, X, Search, Bell, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
-import AuthModal from './AuthModal';
-import SearchBar from './SearchBar';
 import { useToast } from '@/hooks/use-toast';
 
 const Header = () => {
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -58,7 +57,7 @@ const Header = () => {
   }, []);
 
   const handleSignOut = () => {
-    signOut();
+    logout();
     toast({
       title: "Logout realizado",
       description: "Você foi desconectado com sucesso.",
@@ -137,15 +136,15 @@ const Header = () => {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
-                      <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarFallback>{user.name?.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                     <ChevronDown className="h-4 w-4 text-doctordicas-text-medium" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">{user.displayName || 'Usuário'}</p>
+                    <p className="text-sm font-medium">{user.name || 'Usuário'}</p>
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                   <DropdownMenuSeparator />
@@ -278,11 +277,11 @@ const Header = () => {
                       <div className="space-y-4">
                         <div className="flex items-center space-x-3 px-2">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
-                            <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                            <AvatarImage src={user.avatar} alt={user.name} />
+                            <AvatarFallback>{user.name?.charAt(0) || 'U'}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="text-sm font-medium">{user.displayName || 'Usuário'}</p>
+                            <p className="text-sm font-medium">{user.name || 'Usuário'}</p>
                             <p className="text-xs text-gray-500 truncate">{user.email}</p>
                           </div>
                         </div>
@@ -343,13 +342,6 @@ const Header = () => {
           </div>
         </div>
       </div>
-      
-      <AuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
-        initialView={authModalView}
-        onViewChange={setAuthModalView}
-      />
     </header>
   );
 };
