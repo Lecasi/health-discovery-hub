@@ -1,11 +1,11 @@
 
 import React, { useState, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Loader2, Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import ExamResults from './ExamResults';
+import FileUpload from './exam-interpreter/FileUpload';
+import FileList from './exam-interpreter/FileList';
+import ProcessingStatusComponent from './exam-interpreter/ProcessingStatus';
 
 type FileWithPreview = {
   file: File;
@@ -201,192 +201,50 @@ const ExamInterpreter = () => {
     }, 2000);
   };
 
-  const renderSimpleUploadButton = () => (
-    <div className="text-center py-10">
-      <div className="mb-4">
-        <div className="rounded-full bg-blue-50 w-16 h-16 flex items-center justify-center mx-auto mb-2">
-          <FileText className="h-8 w-8 text-doctordicas-blue" />
-        </div>
-        <h3 className="text-lg font-semibold text-doctordicas-text-dark mb-2">
-          Interpretador de Exames
-        </h3>
-        <p className="text-doctordicas-text-medium mb-6">
-          Entenda seus resultados
-        </p>
-      </div>
-      <Button 
-        onClick={() => fileInputRef.current?.click()}
-        className="w-full max-w-md bg-doctordicas-blue"
-      >
-        Enviar exame para análise
-      </Button>
-      <input
-        type="file"
-        multiple
-        onChange={handleFileChange}
-        className="hidden"
-        accept=".pdf,.jpg,.jpeg,.png"
-        ref={fileInputRef}
-      />
-    </div>
-  );
-
-  const renderUploadArea = () => (
-    <div 
-      ref={dropAreaRef}
-      className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors duration-200 ease-in-out"
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-    >
-      <input
-        type="file"
-        multiple
-        onChange={handleFileChange}
-        className="hidden"
-        accept=".pdf,.jpg,.jpeg,.png"
-        ref={fileInputRef}
-      />
-      
-      <div className="mb-4">
-        <div className="rounded-full bg-blue-50 w-16 h-16 flex items-center justify-center mx-auto mb-2">
-          <Upload className="h-8 w-8 text-doctordicas-blue" />
-        </div>
-        <h3 className="text-lg font-semibold text-doctordicas-text-dark">
-          Arraste ou selecione seus exames
-        </h3>
-      </div>
-      
-      <div className="mb-6">
-        <p className="text-doctordicas-text-medium mb-2">
-          Suportamos exames de sangue, urina, hormônios, imagem e mais
-        </p>
-        <div className="flex justify-center space-x-3 mb-4">
-          <div className="p-2 bg-gray-50 rounded">
-            <FileText className="h-6 w-6 text-red-500" />
-          </div>
-        </div>
-        <p className="text-sm text-doctordicas-text-medium">
-          PDF, JPG, PNG (máx. 3 arquivos, 10MB cada)
-        </p>
-      </div>
-      
-      <div>
-        <Button 
-          onClick={() => fileInputRef.current?.click()}
-          className="bg-doctordicas-blue"
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          Selecionar arquivos
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderFilesList = () => (
-    <div className="mt-6">
-      <h3 className="text-lg font-semibold text-doctordicas-text-dark mb-3">
-        Arquivos selecionados ({files.length}/3)
-      </h3>
-      
-      <div className="space-y-3">
-        {files.map((file, index) => (
-          <div key={index} className="flex items-center p-3 border rounded-lg bg-white">
-            <div className="mr-3">
-              {file.type.startsWith('image/') ? (
-                <div className="h-12 w-12 rounded overflow-hidden bg-gray-100">
-                  <img 
-                    src={file.preview} 
-                    alt={file.name} 
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="h-12 w-12 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
-                  <FileText className="h-6 w-6 text-red-500" />
-                </div>
-              )}
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-doctordicas-text-dark truncate">
-                {file.name}
-              </p>
-              <p className="text-xs text-doctordicas-text-medium">
-                {(file.file.size / 1024 / 1024).toFixed(2)} MB
-              </p>
-            </div>
-            
-            <button 
-              onClick={() => removeFile(index)}
-              className="ml-2 text-red-500 hover:text-red-700 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        ))}
-      </div>
-      
-      <div className="mt-6">
-        <Button 
-          onClick={simulateProcessing} 
-          disabled={files.length === 0 || status !== 'idle'}
-          className="w-full bg-doctordicas-blue"
-        >
-          {status === 'idle' ? (
-            <>Interpretar exames</>
-          ) : status === 'uploading' || status === 'processing' ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              {status === 'uploading' ? 'Enviando...' : 'Processando...'}
-            </>
-          ) : (
-            <>Concluído</>
-          )}
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderProcessingStatus = () => (
-    <div className="mt-6 p-6 border rounded-lg bg-white">
-      <h3 className="text-lg font-semibold text-doctordicas-text-dark mb-3">
-        {status === 'uploading' ? 'Enviando arquivos...' : 'Analisando seus exames...'}
-      </h3>
-      
-      {status === 'uploading' && (
-        <div className="space-y-2">
-          <Progress value={progress} className="h-2" />
-          <p className="text-sm text-doctordicas-text-medium text-right">
-            {progress}%
-          </p>
-        </div>
-      )}
-      
-      {status === 'processing' && (
-        <div className="space-y-4">
-          <div className="flex justify-center my-6">
-            <div className="w-16 h-16 rounded-full border-4 border-t-transparent border-doctordicas-blue animate-spin"></div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className="container mx-auto px-4 max-w-3xl mb-12">
       <Card className="shadow-md">
         <CardContent className="p-6">
-          {files.length === 0 && status === 'idle' ? renderSimpleUploadButton() : null}
+          {files.length === 0 && status === 'idle' ? (
+            <FileUpload 
+              onFileChange={handleFileChange}
+              handleDrop={handleDrop}
+              handleDragOver={handleDragOver}
+              handleDragLeave={handleDragLeave}
+              dropAreaRef={dropAreaRef}
+              fileInputRef={fileInputRef}
+              files={files}
+              simpleInterface={true}
+            />
+          ) : null}
+          
           {files.length > 0 && status === 'idle' ? (
             <>
-              {renderUploadArea()}
-              {renderFilesList()}
+              <FileUpload 
+                onFileChange={handleFileChange}
+                handleDrop={handleDrop}
+                handleDragOver={handleDragOver}
+                handleDragLeave={handleDragLeave}
+                dropAreaRef={dropAreaRef}
+                fileInputRef={fileInputRef}
+                files={files}
+              />
+              <FileList 
+                files={files}
+                removeFile={removeFile}
+                simulateProcessing={simulateProcessing}
+                status={status}
+              />
             </>
           ) : null}
-          {(status === 'uploading' || status === 'processing') && renderProcessingStatus()}
+          
+          {(status === 'uploading' || status === 'processing') && (
+            <ProcessingStatusComponent 
+              status={status}
+              progress={progress}
+            />
+          )}
+          
           {status === 'complete' && <ExamResults results={results} />}
         </CardContent>
       </Card>
