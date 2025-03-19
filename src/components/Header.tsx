@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,7 @@ import { Menu, X, Search, Bell, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
+import SearchBar from '@/components/SearchBar';
 
 const Header = () => {
   const { user, logout } = useAuth();
