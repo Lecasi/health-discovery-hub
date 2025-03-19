@@ -1,11 +1,10 @@
-
 import React, { useState, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Upload, Camera, FileText, PlusCircle, AlertCircle, CheckCircle, File, FilePdf, FileImage, MessageCircle } from 'lucide-react';
+import { Loader2, Upload, Camera, FileText, PlusCircle, AlertCircle, CheckCircle, File, FileImage, MessageCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import ExamResults from './ExamResults';
 import ExamChat from './ExamChat';
@@ -118,7 +117,6 @@ const ExamInterpreter = () => {
   const removeFile = (index: number) => {
     setFiles(prev => {
       const newFiles = [...prev];
-      // Free memory for preview URL
       if (prev[index].preview && prev[index].preview !== '/placeholder.svg') {
         URL.revokeObjectURL(prev[index].preview);
       }
@@ -140,7 +138,6 @@ const ExamInterpreter = () => {
     setStatus('uploading');
     setProgress(0);
     
-    // Simulate file upload progress
     const uploadTimer = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
@@ -151,7 +148,6 @@ const ExamInterpreter = () => {
       });
     }, 100);
 
-    // Simulate upload completion
     setTimeout(() => {
       clearInterval(uploadTimer);
       setProgress(100);
@@ -159,7 +155,6 @@ const ExamInterpreter = () => {
       setProcessingStep(0);
       setProcessingMessage(processingSteps[0]);
       
-      // Simulate processing steps
       let step = 0;
       const processingTimer = setInterval(() => {
         if (step < processingSteps.length - 1) {
@@ -169,7 +164,6 @@ const ExamInterpreter = () => {
         } else {
           clearInterval(processingTimer);
           
-          // Generate mock results based on uploaded files
           const mockResults = {
             summary: "Seus exames indicam valores dentro da normalidade para a maioria dos parâmetros, com exceção de níveis levemente elevados de glicose e colesterol LDL.",
             parameters: [
@@ -262,7 +256,7 @@ const ExamInterpreter = () => {
         </p>
         <div className="flex justify-center space-x-3 mb-4">
           <div className="p-2 bg-gray-50 rounded">
-            <FilePdf className="h-6 w-6 text-red-500" />
+            <FileText className="h-6 w-6 text-red-500" />
           </div>
           <div className="p-2 bg-gray-50 rounded">
             <FileImage className="h-6 w-6 text-blue-500" />
@@ -316,7 +310,7 @@ const ExamInterpreter = () => {
                 </div>
               ) : (
                 <div className="h-12 w-12 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
-                  <FilePdf className="h-6 w-6 text-red-500" />
+                  <FileText className="h-6 w-6 text-red-500" />
                 </div>
               )}
             </div>
