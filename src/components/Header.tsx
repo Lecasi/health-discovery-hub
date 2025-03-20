@@ -75,14 +75,9 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img
-              src="/logo.svg"
-              alt="Doctor Dicas"
-              className="h-8 w-auto"
-            />
-            <span className="ml-2 text-xl font-bold text-doctordicas-blue">
-              DoctorDicas
-            </span>
+            <div className="bg-doctordicas-blue text-white font-bold py-2 px-4 rounded-lg inline-block">
+              doctordicas.com
+            </div>
           </Link>
 
           {/* Navigation for desktop */}
