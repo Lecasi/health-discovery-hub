@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -72,7 +71,6 @@ const ComparadorPrecos = () => {
       toast({
         title: "Alerta configurado",
         description: `Você receberá alertas quando o preço de ${productName} baixar`,
-        variant: "success"
       });
     }
   };
@@ -83,7 +81,6 @@ const ComparadorPrecos = () => {
       toast({
         title: "Compra iniciada!",
         description: `Redirecionando para ${pharmacy.name}...`,
-        variant: "success"
       });
     }
   };
@@ -95,7 +92,6 @@ const ComparadorPrecos = () => {
   const sortedPharmacies = [...pharmacies].sort((a, b) => a.price - b.price);
   const bestDeal = sortedPharmacies[0];
 
-  // Função para exibir ratings com estrelas
   const displayRating = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -253,7 +249,6 @@ const ComparadorPrecos = () => {
           <p className="text-doctordicas-text-medium">Encontre os melhores preços em medicamentos e produtos de saúde</p>
         </div>
         
-        {/* Barra de pesquisa */}
         <Card className="mb-8">
           <CardContent className="pt-6">
             <form onSubmit={handleSearch} className="flex gap-2">
@@ -272,7 +267,6 @@ const ComparadorPrecos = () => {
           </CardContent>
         </Card>
         
-        {/* Alternador de visualização */}
         <div className="flex justify-center mb-6">
           <div className="inline-flex bg-white rounded-lg p-1 shadow-sm">
             <Button 
@@ -302,7 +296,6 @@ const ComparadorPrecos = () => {
           </div>
         </div>
         
-        {/* Área de informações do produto */}
         <Card className="mb-8 bg-gradient-to-r from-blue-50 to-white">
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between">
@@ -334,7 +327,6 @@ const ComparadorPrecos = () => {
           </CardContent>
         </Card>
         
-        {/* Visualização em Carrossel */}
         {viewMode === "carousel" && (
           <div className="mb-8">
             <Card>
@@ -367,7 +359,6 @@ const ComparadorPrecos = () => {
           </div>
         )}
         
-        {/* Visualização em Lista */}
         {viewMode === "list" && (
           <Card className="mb-8">
             <CardHeader>
@@ -479,7 +470,6 @@ const ComparadorPrecos = () => {
           </Card>
         )}
         
-        {/* Visualização de Mapa - Mockup */}
         {viewMode === "map" && (
           <Card className="mb-8">
             <CardHeader>
@@ -499,7 +489,6 @@ const ComparadorPrecos = () => {
           </Card>
         )}
         
-        {/* Histórico de Preços */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Histórico de Preços</CardTitle>
@@ -542,7 +531,6 @@ const ComparadorPrecos = () => {
           </CardContent>
         </Card>
         
-        {/* Comparação Visual */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Comparação Visual</CardTitle>
@@ -577,7 +565,6 @@ const ComparadorPrecos = () => {
           </CardContent>
         </Card>
         
-        {/* Dicas de economia */}
         <Card className="mb-8 bg-gradient-to-r from-blue-50 to-white">
           <CardHeader>
             <CardTitle>Dicas para economizar</CardTitle>
