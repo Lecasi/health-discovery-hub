@@ -59,7 +59,8 @@ const HealthTools = () => {
         {tools.map((tool) => (
           <div 
             key={tool.id} 
-            className="bg-white rounded-2xl p-6 card-shadow card-hover"
+            className="bg-white rounded-2xl p-6 card-shadow hover:shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer"
+            onClick={() => handleToolClick(tool.path)}
           >
             <div className="flex items-start mb-4">
               <div className={`p-2 rounded-lg bg-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'}-50`}>
@@ -76,7 +77,6 @@ const HealthTools = () => {
             </div>
             
             <button 
-              onClick={() => handleToolClick(tool.path)}
               className={`w-full text-center py-2 rounded-lg border border-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} text-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} font-medium hover:bg-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} hover:text-white transition-colors`}
             >
               {tool.action}
