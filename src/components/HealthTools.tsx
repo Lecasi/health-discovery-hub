@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileText, Heart, Utensils } from 'lucide-react';
+import { FileText, Heart, Utensils, DollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const HealthTools = () => {
@@ -33,6 +33,15 @@ const HealthTools = () => {
       action: 'Criar plano alimentar',
       path: '#',
       color: 'green'
+    },
+    {
+      id: 4,
+      icon: <DollarSign className="text-doctordicas-blue" size={24} />,
+      title: 'Comparador de Preços',
+      description: 'Economize em medicamentos',
+      action: 'Comparar preços agora',
+      path: '/comparador',
+      color: 'blue'
     }
   ];
 
@@ -46,7 +55,7 @@ const HealthTools = () => {
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 my-12">
       <h2 className="section-title">Ferramentas inteligentes</h2>
       
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {tools.map((tool) => (
           <div 
             key={tool.id} 
