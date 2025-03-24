@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, CheckCircle, ArrowRight } from 'lucide-react';
 
-interface WelcomeBannerProps {
+export interface WelcomeBannerProps {
   onClose: () => void;
 }
 

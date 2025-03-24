@@ -1,11 +1,9 @@
 
 import React from 'react';
 import { FileText, Heart, Utensils } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const HealthTools = () => {
-  const navigate = useNavigate();
-  
   const tools = [
     {
       id: 1,
@@ -36,12 +34,6 @@ const HealthTools = () => {
     }
   ];
 
-  const handleToolClick = (path: string) => {
-    if (path !== '#') {
-      navigate(path);
-    }
-  };
-
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 my-12">
       <h2 className="section-title">Ferramentas inteligentes</h2>
@@ -66,12 +58,20 @@ const HealthTools = () => {
               </div>
             </div>
             
-            <button 
-              onClick={() => handleToolClick(tool.path)}
-              className={`w-full text-center py-2 rounded-lg border border-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} text-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} font-medium hover:bg-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} hover:text-white transition-colors`}
-            >
-              {tool.action}
-            </button>
+            {tool.path !== '#' ? (
+              <Link 
+                to={tool.path}
+                className={`block w-full text-center py-2 rounded-lg border border-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} text-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} font-medium hover:bg-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} hover:text-white transition-colors`}
+              >
+                {tool.action}
+              </Link>
+            ) : (
+              <button 
+                className={`w-full text-center py-2 rounded-lg border border-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} text-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} font-medium hover:bg-doctordicas-${tool.color === 'blue' ? 'blue' : tool.color === 'red' ? 'red' : 'green'} hover:text-white transition-colors`}
+              >
+                {tool.action}
+              </button>
+            )}
           </div>
         ))}
       </div>
