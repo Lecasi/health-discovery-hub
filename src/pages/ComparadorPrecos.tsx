@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -99,10 +100,10 @@ const ComparadorPrecos = () => {
     return (
       <span className="flex items-center">
         {[...Array(fullStars)].map((_, i) => (
-          <Star key={i} className="text-yellow-500" size={16} fill="currentColor" />
+          <Star key={i} className="text-yellow-500" size={14} fill="currentColor" />
         ))}
-        {hasHalfStar && <StarHalf className="text-yellow-500" size={16} fill="currentColor" />}
-        <span className="ml-1 text-sm text-gray-600">{rating}</span>
+        {hasHalfStar && <StarHalf className="text-yellow-500" size={14} fill="currentColor" />}
+        <span className="ml-1 text-xs text-gray-600">{rating}</span>
       </span>
     );
   };
@@ -114,121 +115,121 @@ const ComparadorPrecos = () => {
     return (
       <div 
         key={pharmacy.id}
-        className={`relative bg-white rounded-2xl p-5 transition-all duration-300 transform ${isSelected ? 'scale-105' : 'hover:scale-105'} card-shadow cursor-pointer ${isBest ? 'border-2 border-doctordicas-blue' : ''}`}
+        className={`relative bg-white rounded-xl p-3 transition-all duration-300 h-full ${isSelected ? 'scale-102' : 'hover:scale-102'} card-shadow cursor-pointer ${isBest ? 'border-2 border-doctordicas-blue' : ''}`}
         onClick={() => selectPharmacy(pharmacy.id)}
       >
         {isBest && (
-          <div className="absolute -top-3 -right-3 bg-doctordicas-blue text-white rounded-full p-2 shadow-md animate-pulse">
-            <Trophy size={18} />
+          <div className="absolute -top-2 -right-2 bg-doctordicas-blue text-white rounded-full p-1 shadow-md">
+            <Trophy size={14} />
           </div>
         )}
         
         {index < 3 && (
-          <div className={`absolute -top-3 -left-3 ${index === 0 ? 'bg-doctordicas-blue' : index === 1 ? 'bg-doctordicas-green' : 'bg-doctordicas-yellow'} text-white w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md`}>
+          <div className={`absolute -top-2 -left-2 ${index === 0 ? 'bg-doctordicas-blue' : index === 1 ? 'bg-doctordicas-green' : 'bg-doctordicas-yellow'} text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-md`}>
             {index + 1}º
           </div>
         )}
         
-        <div className="flex items-center mb-4">
-          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-2xl mr-3 shadow-inner">
+        <div className="flex items-center mb-2">
+          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-lg mr-2 shadow-inner">
             {pharmacy.logo}
           </div>
           <div>
-            <h3 className="font-bold text-lg">{pharmacy.name}</h3>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+            <h3 className="font-bold text-sm">{pharmacy.name}</h3>
+            <div className="flex items-center">
               {displayRating(pharmacy.rating)}
-              <div className="flex items-center text-sm text-gray-600">
-                <MapPin size={14} className="mr-1" /> {pharmacy.distance} km
+              <div className="flex items-center text-xs text-gray-600 ml-1">
+                <MapPin size={10} className="mr-0.5" /> {pharmacy.distance} km
               </div>
             </div>
           </div>
           {pharmacy.partner && (
-            <Badge variant="outline" className="ml-auto bg-blue-50 text-doctordicas-blue border-blue-200">
-              <Check size={12} className="mr-1" /> Verificado
+            <Badge variant="outline" className="ml-auto bg-blue-50 text-doctordicas-blue border-blue-200 text-[10px] px-1 py-0">
+              <Check size={8} className="mr-0.5" /> Verificado
             </Badge>
           )}
         </div>
         
-        <div className="flex flex-col items-center mb-4">
+        <div className="flex flex-col items-center mb-2">
           {pharmacy.discount > 0 && (
-            <div className="text-sm line-through text-gray-400 mb-1">
+            <div className="text-xs line-through text-gray-400">
               R$ {pharmacy.originalPrice.toFixed(2)}
             </div>
           )}
-          <div className={`text-2xl font-bold ${isBest ? 'text-doctordicas-blue animate-bounce' : 'text-doctordicas-text-dark'}`}>
+          <div className={`text-lg font-bold ${isBest ? 'text-doctordicas-blue' : 'text-doctordicas-text-dark'}`}>
             R$ {pharmacy.price.toFixed(2)}
           </div>
           {pharmacy.discount > 0 && (
-            <Badge className="mt-2 bg-green-500">
-              <Percent size={12} className="mr-1" /> {pharmacy.discount}% OFF
+            <Badge className="mt-1 bg-green-500 text-[10px] px-1 py-0">
+              <Percent size={8} className="mr-0.5" /> {pharmacy.discount}% OFF
             </Badge>
           )}
         </div>
         
-        <div className="mb-4">
-          <div className="text-sm text-gray-600 mb-1">Índice de valor:</div>
+        <div className="mb-2">
+          <div className="text-xs text-gray-600 mb-0.5">Índice de valor:</div>
           <div className="flex items-center">
-            <Progress value={pharmacy.value * 10} className="h-2 mr-2" />
-            <span className={`font-medium ${pharmacy.value >= 9 ? 'text-green-600' : pharmacy.value >= 8 ? 'text-yellow-600' : 'text-red-600'}`}>
+            <Progress value={pharmacy.value * 10} className="h-1.5 mr-2" />
+            <span className={`text-xs font-medium ${pharmacy.value >= 9 ? 'text-green-600' : pharmacy.value >= 8 ? 'text-yellow-600' : 'text-red-600'}`}>
               {pharmacy.value.toFixed(1)}
             </span>
           </div>
         </div>
         
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-          <Clock size={14} className="text-gray-400" />
+        <div className="flex items-center gap-1 text-xs text-gray-600 mb-2">
+          <Clock size={10} className="text-gray-400" />
           <span>Entrega: {pharmacy.delivery}</span>
           
           {pharmacy.streak > 0 && (
             <div className="ml-auto flex items-center">
-              <Award size={14} className="text-doctordicas-yellow mr-1" />
+              <Award size={10} className="text-doctordicas-yellow mr-0.5" />
               <span>{pharmacy.streak}x</span>
             </div>
           )}
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <Button 
             variant="outline" 
             size="sm" 
-            className="flex-1"
+            className="flex-1 text-xs py-1 h-7"
             onClick={(e) => {
               e.stopPropagation();
               toggleMonitor("Dipirona 500mg");
             }}
           >
-            <Bell size={14} className="mr-1" />
+            <Bell size={10} className="mr-1" />
             {monitoredProducts.includes("Dipirona 500mg") ? "Monitorando" : "Monitorar"}
           </Button>
           <Button 
             size="sm" 
-            className={`flex-1 ${!pharmacy.inStock ? 'opacity-50' : ''} ${isBest ? 'bg-doctordicas-blue hover:bg-doctordicas-blue/90' : ''}`}
+            className={`flex-1 text-xs py-1 h-7 ${!pharmacy.inStock ? 'opacity-50' : ''} ${isBest ? 'bg-doctordicas-blue hover:bg-doctordicas-blue/90' : ''}`}
             disabled={!pharmacy.inStock}
             onClick={(e) => {
               e.stopPropagation();
               handlePurchase(pharmacy.id);
             }}
           >
-            <ShoppingCart size={14} className="mr-1" />
+            <ShoppingCart size={10} className="mr-1" />
             Comprar
           </Button>
         </div>
         
         {isSelected && (
-          <div className="mt-4 pt-4 border-t border-gray-200 animate-fade-in">
-            <h4 className="font-semibold mb-2">Detalhes adicionais</h4>
-            <ul className="text-sm text-gray-600 space-y-2">
+          <div className="mt-3 pt-2 border-t border-gray-200 animate-fade-in">
+            <h4 className="font-semibold text-xs mb-1">Detalhes adicionais</h4>
+            <ul className="text-xs text-gray-600 space-y-1">
               <li className="flex items-start">
-                <ThumbsUp size={14} className="text-doctordicas-green mr-2 mt-0.5" />
+                <ThumbsUp size={10} className="text-doctordicas-green mr-1 mt-0.5" />
                 <span>98% dos clientes recomendam</span>
               </li>
               <li className="flex items-start">
-                <Clock size={14} className="text-doctordicas-blue mr-2 mt-0.5" />
+                <Clock size={10} className="text-doctordicas-blue mr-1 mt-0.5" />
                 <span>Entregas realizadas em até {pharmacy.delivery} (média)</span>
               </li>
               {pharmacy.discount > 0 && (
                 <li className="flex items-start">
-                  <Percent size={14} className="text-doctordicas-red mr-2 mt-0.5" />
+                  <Percent size={10} className="text-doctordicas-red mr-1 mt-0.5" />
                   <span>Economia de R$ {(pharmacy.originalPrice - pharmacy.price).toFixed(2)}</span>
                 </li>
               )}
@@ -344,7 +345,7 @@ const ComparadorPrecos = () => {
                 >
                   <CarouselContent className="-ml-2 md:-ml-4">
                     {sortedPharmacies.map((pharmacy, index) => (
-                      <CarouselItem key={pharmacy.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                      <CarouselItem key={pharmacy.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
                         {renderPharmacyCard(pharmacy, index)}
                       </CarouselItem>
                     ))}
