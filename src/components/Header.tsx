@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Menu, X, Search, Bell, ChevronDown, Download } from 'lucide-react';
+import { Menu, X, Search, Bell, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -95,20 +94,10 @@ const Header = () => {
             <NavLink to="/consulta" className={navLinkClasses}>
               Consulta Virtual
             </NavLink>
-            <NavLink to="/extensao" className={navLinkClasses}>
-              Extensão
-            </NavLink>
           </nav>
 
           {/* Right side elements */}
           <div className="flex items-center space-x-4">
-            {/* Extension Install Button - Desktop only */}
-            <Link to="/extensao" className="hidden md:flex items-center">
-              <Button variant="outline" size="sm" className="flex items-center gap-1">
-                <Download className="h-4 w-4" /> Extensão
-              </Button>
-            </Link>
-
             {/* Search button */}
             <div ref={searchRef} className="relative">
               <button

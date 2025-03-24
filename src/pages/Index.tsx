@@ -1,89 +1,110 @@
 
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import WelcomeBanner from '@/components/WelcomeBanner';
-import FeaturedContent from '@/components/FeaturedContent';
-import TrendingTopics from '@/components/TrendingTopics';
+import SearchBar from '@/components/SearchBar';
+import AIAssistant from '@/components/AIAssistant';
+import DiagnosticCard from '@/components/DiagnosticCard';
+import ConsultationCard from '@/components/ConsultationCard';
 import HealthTools from '@/components/HealthTools';
-import NewsSection from '@/components/NewsSection';
+import FeaturedContent from '@/components/FeaturedContent';
+import Community from '@/components/Community';
 import StatisticsBanner from '@/components/StatisticsBanner';
+import Footer from '@/components/Footer';
+import ScrollToTop from '@/components/ScrollToTop';
+import WelcomeBanner from '@/components/WelcomeBanner';
+import { useToast } from "@/hooks/use-toast";
 import HealthNews from '@/components/HealthNews';
 import NutritionSection from '@/components/NutritionSection';
 import MentalHealthSection from '@/components/MentalHealthSection';
-import HealthTrends from '@/components/HealthTrends';
-import Community from '@/components/Community';
-import ExtensionSection from '@/components/ExtensionSection';
-import ScrollToTop from '@/components/ScrollToTop';
+import TrendingTopics from '@/components/TrendingTopics';
+import UserInsightCollector from '@/components/UserInsightCollector';
 
 const Index = () => {
-  const [showWelcomeBanner, setShowWelcomeBanner] = useState(true);
-
-  const handleCloseWelcomeBanner = () => {
-    setShowWelcomeBanner(false);
-  };
-
-  // Dummy articles data for NewsSection
-  const recentArticles = [
-    {
-      id: 1,
-      title: 'Como identificar sintomas de ansiedade',
-      excerpt: 'Aprenda a reconhecer os sinais de ansiedade e quando buscar ajuda profissional.',
-      image: 'https://images.unsplash.com/photo-1493836512294-502baa1986e2?w=500&auto=format',
-      category: 'Saúde Mental',
-      categoryColor: 'blue' as const,
-      publishedAt: '3 dias atrás',
-      readTime: '5 min de leitura',
-      author: 'Dr. Carlos Mendes',
-      featured: true
-    },
-    {
-      id: 2,
-      title: 'Benefícios da vitamina D para imunidade',
-      excerpt: 'Descubra como a vitamina do sol pode fortalecer seu sistema imunológico.',
-      image: 'https://images.unsplash.com/photo-1584118624012-df056829fbd0?w=500&auto=format',
-      category: 'Nutrição',
-      categoryColor: 'green' as const,
-      publishedAt: '5 dias atrás',
-      readTime: '4 min de leitura',
-      author: 'Dra. Ana Silva'
-    }
-  ];
-
-  return (
-    <>
-      <Helmet>
-        <title>Doctor Dicas - Seu parceiro de saúde</title>
-        <meta name="description" content="Artigos médicos, consultas virtuais e orientações confiáveis para sua saúde." />
-      </Helmet>
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [hasVisitedBefore, setHasVisitedBefore] = useState(false);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    // Check if user has visited before
+    const visited = localStorage.getItem('visited');
+    if (visited) {
+      setHasVisitedBefore(true);
+      setShowWelcome(false);
+    } else {
+      // Auto-hide welcome banner after 10 seconds
+      const timer = setTimeout(() => {
+        setShowWelcome(false);
+      }, 10000);
       
+      return () => clearTimeout(timer);
+    }
+  }, []);
+  
+  useEffect(() => {
+    // Mark as visited when banner is closed
+    if (!showWelcome) {
+      localStorage.setItem('visited', 'true');
+    }
+  }, [showWelcome]);
+  
+  useEffect(() => {
+    // Mark the page as loaded
+    setIsPageLoaded(true);
+    
+    // Show a welcome back toast for returning users
+    if (hasVisitedBefore) {
+      setTimeout(() => {
+        toast({
+          title: "Bem-vindo de volta!",
+          description: "Estamos felizes em vê-lo novamente.",
+          duration: 5000
+        });
+      }, 1000);
+    }
+  }, [hasVisitedBefore, toast]);
+  
+  return (
+    <div className={`min-h-screen bg-doctordicas-bg-light transition-opacity duration-500 ${isPageLoaded ? 'opacity-100' : 'opacity-0'}`}>
       <Header />
       
-      <main>
-        {showWelcomeBanner && <WelcomeBanner onClose={handleCloseWelcomeBanner} />}
-        <FeaturedContent />
-        <TrendingTopics />
-        <HealthTools />
-        <NewsSection
-          title="Artigos Recentes"
-          description="Informações médicas baseadas em evidências"
-          layout="featured"
-          theme="light"
-          items={recentArticles}
-        />
-        <ExtensionSection />
-        <StatisticsBanner />
+      {showWelcome && <WelcomeBanner onClose={() => setShowWelcome(false)} />}
+      
+      <UserInsightCollector />
+      
+      <main className="pt-4">
+        <SearchBar />
+        <AIAssistant />
+        
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+          <div className="grid md:grid-cols-2 gap-6">
+            <DiagnosticCard />
+            <ConsultationCard />
+          </div>
+          <div className="text-center mt-4">
+            <Link 
+              to="/diagnostico" 
+              className="inline-flex items-center text-doctordicas-blue hover:text-blue-700 transition-colors"
+            >
+              Ver sistema de diagnóstico completo →
+            </Link>
+          </div>
+        </div>
+        
         <HealthNews />
+        <TrendingTopics />
         <NutritionSection />
         <MentalHealthSection />
-        <HealthTrends />
+        <HealthTools />
+        <FeaturedContent />
         <Community />
+        <StatisticsBanner />
       </main>
       
       <Footer />
       <ScrollToTop />
-    </>
+    </div>
   );
 };
 
