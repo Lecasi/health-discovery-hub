@@ -18,6 +18,7 @@ import ConsultationPage from "./pages/ConsultationPage";
 import ExamInterpreterPage from "./pages/ExamInterpreterPage";
 import ComparadorPrecos from "./pages/ComparadorPrecos";
 import CardiacCalculator from "./pages/CardiacCalculator";
+import MedicineComparisonPage from "./pages/MedicineComparisonPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/consulta" element={<ConsultationPage />} />
             <Route path="/exames" element={<ExamInterpreterPage />} />
             <Route path="/comparador" element={<ComparadorPrecos />} />
+            <Route path="/medicamentos" element={<MedicineComparisonPage />} />
             <Route path="/calculadora-cardiaca" element={<CardiacCalculator />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

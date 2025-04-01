@@ -40,7 +40,7 @@ const HealthTools = () => {
       title: 'Comparador de Preços',
       description: 'Economize em medicamentos',
       action: 'Comparar preços agora',
-      path: '/comparador',
+      path: '/medicamentos',
       color: 'blue'
     }
   ];
