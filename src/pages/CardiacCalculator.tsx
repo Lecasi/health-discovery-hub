@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -1120,7 +1119,7 @@ const CardiacCalculator = () => {
                   </div>
                 )}
                 
-                {currentStep !== 'onboarding' && currentStep !== 'results' && (
+                {currentStep !== 'results' && currentStep !== 'onboarding' && (
                   <div className="flex justify-between mt-8">
                     <Button
                       variant="outline"
