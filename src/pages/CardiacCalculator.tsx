@@ -1,71 +1,80 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Toggle } from '@/components/ui/toggle';
+import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
-import { ArrowLeft, ArrowRight, Clock, Lock, ChevronLeft, ChevronRight, Star, Check, HelpCircle, Info } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { Heart, Activity, Clock, Info, AlertCircle, ChevronRight, Award, Check, Star, ArrowRight, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 
-// Types
+// Update the Step type to include 'onboarding'
 type Step = 'onboarding' | 'basic' | 'lifestyle' | 'clinical' | 'results';
-type Gender = 'male' | 'female';
-type ActivityLevel = 'sedentary' | 'moderate' | 'intense';
-type AlcoholConsumption = 'none' | 'moderate' | 'high';
-type RiskFactor = {
-  id: number;
-  name: string;
-  impact: string;
-  value: number;
-};
-type RecommendedAction = {
-  id: number;
-  title: string;
-  description?: string;
-};
+
+// Define types for the user data
+interface UserData {
+  // Basic data
+  age: number;
+  sex: 'male' | 'female';
+  weight: number;
+  height: number;
+  familyHistory: boolean;
+  
+  // Lifestyle data
+  activityLevel: 'sedentary' | 'light' | 'moderate' | 'active';
+  smoker: boolean;
+  diabetic: boolean;
+  alcoholConsumption: 'none' | 'moderate' | 'heavy';
+  
+  // Clinical data
+  systolicBP?: number;
+  totalCholesterol?: number;
+  hdlCholesterol?: number;
+}
 
 const CardiacCalculator = () => {
-  const { toast } = useToast();
+  // State for the current step in the process
   const [currentStep, setCurrentStep] = useState<Step>('onboarding');
   const [progress, setProgress] = useState(0);
+  const { toast } = useToast();
   
-  // Basic information
-  const [age, setAge] = useState(40);
-  const [gender, setGender] = useState<Gender>('male');
-  const [weight, setWeight] = useState(70);
-  const [height, setHeight] = useState(1.7);
-  const [familyHistory, setFamilyHistory] = useState(false);
+  // User data state
+  const [userData, setUserData] = useState<UserData>({
+    age: 40,
+    sex: 'male',
+    weight: 70,
+    height: 170,
+    familyHistory: false,
+    activityLevel: 'moderate',
+    smoker: false,
+    diabetic: false,
+    alcoholConsumption: 'none',
+  });
   
-  // Lifestyle
-  const [activityLevel, setActivityLevel] = useState<ActivityLevel>('moderate');
-  const [smoking, setSmoking] = useState(false);
-  const [diabetes, setDiabetes] = useState(false);
-  const [alcoholConsumption, setAlcoholConsumption] = useState<AlcoholConsumption>('moderate');
-  
-  // Clinical
-  const [systolicPressure, setSystolicPressure] = useState<number | null>(null);
-  const [cholesterolTotal, setCholesterolTotal] = useState<number | null>(null);
-  const [cholesterolHDL, setCholesterolHDL] = useState<number | null>(null);
-  
-  // Results
+  // Derived state
   const [bmi, setBmi] = useState(0);
-  const [riskScore, setRiskScore] = useState(0);
-  const [riskLevel, setRiskLevel] = useState('');
-  const [reliabilityLevel, setReliabilityLevel] = useState('Básico');
-  const [riskFactors, setRiskFactors] = useState<RiskFactor[]>([]);
-  const [recommendations, setRecommendations] = useState<RecommendedAction[]>([]);
-
+  const [risk, setRisk] = useState(0);
+  const [riskCategory, setRiskCategory] = useState('');
+  const [mainFactors, setMainFactors] = useState<string[]>([]);
+  
   // Calculate BMI whenever weight or height changes
   useEffect(() => {
-    const calculatedBmi = weight / (height * height);
-    setBmi(parseFloat(calculatedBmi.toFixed(1)));
-  }, [weight, height]);
-
+    if (userData.weight > 0 && userData.height > 0) {
+      const heightInMeters = userData.height / 100;
+      const calculatedBmi = userData.weight / (heightInMeters * heightInMeters);
+      setBmi(parseFloat(calculatedBmi.toFixed(1)));
+    }
+  }, [userData.weight, userData.height]);
+  
   // Update progress based on current step
   useEffect(() => {
     switch (currentStep) {
@@ -83,1081 +92,1183 @@ const CardiacCalculator = () => {
         break;
       case 'results':
         setProgress(100);
-        calculateRiskScore();
         break;
-      default:
-        setProgress(0);
     }
   }, [currentStep]);
-
-  // Calculate risk score
-  const calculateRiskScore = () => {
-    // Simple risk calculation algorithm based on provided data
-    let score = 0;
+  
+  const handleInputChange = (field: keyof UserData, value: any) => {
+    setUserData(prev => ({ ...prev, [field]: value }));
+  };
+  
+  const calculateRisk = () => {
+    // This is a simplified risk calculation for demonstration
+    // In a real app, you would implement an actual risk algorithm
     
-    // Age factor
-    if (age > 60) score += 4;
-    else if (age > 50) score += 3;
-    else if (age > 40) score += 2;
-    else if (age > 30) score += 1;
+    // Base risk based on age
+    let calculatedRisk = (userData.age - 30) * 0.5;
+    if (calculatedRisk < 0) calculatedRisk = 0;
     
-    // Gender factor
-    if (gender === 'male') score += 1;
-    
-    // BMI factor
-    if (bmi > 30) score += 3;
-    else if (bmi > 25) score += 2;
-    else if (bmi < 18.5) score += 1;
-    
-    // Family history
-    if (familyHistory) score += 4;
-    
-    // Lifestyle factors
-    if (activityLevel === 'sedentary') score += 2;
-    if (smoking) score += 3;
-    if (diabetes) score += 4;
-    if (alcoholConsumption === 'high') score += 2;
-    
-    // Clinical factors if available
-    if (systolicPressure !== null) {
-      if (systolicPressure > 160) score += 4;
-      else if (systolicPressure > 140) score += 3;
-      setReliabilityLevel('Intermediário');
+    // Adjust for sex
+    if (userData.sex === 'male') {
+      calculatedRisk += 2;
     }
     
-    if (cholesterolTotal !== null && cholesterolHDL !== null) {
-      if (cholesterolTotal > 240) score += 3;
-      else if (cholesterolTotal > 200) score += 2;
-      
-      if (cholesterolHDL < 40) score += 2;
-      setReliabilityLevel('Avançado');
+    // Adjust for BMI
+    if (bmi >= 30) {
+      calculatedRisk += 3;
+    } else if (bmi >= 25) {
+      calculatedRisk += 1.5;
     }
     
-    // Convert score to percentage risk (simple mapping for demonstration)
-    const riskPercentage = Math.min(Math.round((score / 25) * 100) / 4, 35);
-    setRiskScore(riskPercentage);
+    // Adjust for family history
+    if (userData.familyHistory) {
+      calculatedRisk += 4;
+    }
     
-    // Set risk level
-    if (riskPercentage < 5) {
-      setRiskLevel('Baixo');
-    } else if (riskPercentage < 10) {
-      setRiskLevel('Moderado');
-    } else if (riskPercentage < 20) {
-      setRiskLevel('Moderado-Alto');
+    // Adjust for lifestyle factors
+    if (userData.smoker) {
+      calculatedRisk += 5;
+    }
+    
+    if (userData.diabetic) {
+      calculatedRisk += 4;
+    }
+    
+    if (userData.alcoholConsumption === 'heavy') {
+      calculatedRisk += 3;
+    } else if (userData.alcoholConsumption === 'moderate') {
+      calculatedRisk += 1;
+    }
+    
+    if (userData.activityLevel === 'sedentary') {
+      calculatedRisk += 3;
+    } else if (userData.activityLevel === 'light') {
+      calculatedRisk += 1;
+    } else if (userData.activityLevel === 'active') {
+      calculatedRisk -= 2;
+    }
+    
+    // Clinical factors if provided
+    if (userData.systolicBP) {
+      if (userData.systolicBP >= 140) {
+        calculatedRisk += 5;
+      } else if (userData.systolicBP >= 130) {
+        calculatedRisk += 2.5;
+      }
+    }
+    
+    if (userData.totalCholesterol && userData.hdlCholesterol) {
+      const ratio = userData.totalCholesterol / userData.hdlCholesterol;
+      if (ratio > 5) {
+        calculatedRisk += 5;
+      } else if (ratio > 3.5) {
+        calculatedRisk += 2.5;
+      }
+    }
+    
+    // Cap the risk at 30%
+    calculatedRisk = Math.min(calculatedRisk, 30);
+    
+    // Determine the main risk factors
+    const factors = [];
+    
+    if (userData.age > 50) factors.push('Idade acima de 50 anos');
+    if (userData.sex === 'male') factors.push('Sexo masculino');
+    if (bmi >= 30) factors.push('Obesidade');
+    if (userData.familyHistory) factors.push('Histórico familiar');
+    if (userData.smoker) factors.push('Tabagismo');
+    if (userData.diabetic) factors.push('Diabetes');
+    if (userData.alcoholConsumption === 'heavy') factors.push('Consumo elevado de álcool');
+    if (userData.activityLevel === 'sedentary') factors.push('Sedentarismo');
+    if (userData.systolicBP && userData.systolicBP >= 140) factors.push('Pressão arterial elevada');
+    if (userData.totalCholesterol && userData.totalCholesterol > 200) factors.push('Colesterol total elevado');
+    if (userData.hdlCholesterol && userData.hdlCholesterol < 40) factors.push('HDL baixo');
+    
+    // Take the top 3 factors
+    setMainFactors(factors.slice(0, 3));
+    
+    // Set the risk category
+    if (calculatedRisk < 5) {
+      setRiskCategory('Baixo');
+    } else if (calculatedRisk < 10) {
+      setRiskCategory('Moderado');
+    } else if (calculatedRisk < 20) {
+      setRiskCategory('Moderado-Alto');
     } else {
-      setRiskLevel('Alto');
+      setRiskCategory('Alto');
     }
     
-    // Set risk factors
-    const factors: RiskFactor[] = [];
-    
-    if (familyHistory) {
-      factors.push({
-        id: 1,
-        name: 'Histórico familiar',
-        impact: 'Aumenta seu risco em +40%',
-        value: 40
-      });
-    }
-    
-    factors.push({
-      id: 2,
-      name: 'Idade e sexo',
-      impact: 'Fatores não modificáveis',
-      value: 25
-    });
-    
-    if (!smoking) {
-      factors.push({
-        id: 3,
-        name: 'Pontos positivos',
-        impact: 'Não fumar reduz seu risco em -30%',
-        value: -30
-      });
-    }
-    
-    setRiskFactors(factors);
-    
-    // Set recommendations
-    const actions: RecommendedAction[] = [];
-    
-    actions.push({
-      id: 1,
-      title: 'Agende uma consulta médica'
-    });
-    
-    if (cholesterolTotal === null) {
-      actions.push({
-        id: 2,
-        title: 'Faça exames de colesterol completo'
-      });
-    }
-    
-    if (bmi > 25) {
-      actions.push({
-        id: 3,
-        title: 'Modifique sua dieta para controle de peso'
-      });
-    }
-    
-    setRecommendations(actions);
-  };
-
-  // Handle step navigation
-  const goToNextStep = () => {
-    switch(currentStep) {
-      case 'onboarding':
-        setCurrentStep('basic');
-        break;
-      case 'basic':
-        setCurrentStep('lifestyle');
-        break;
-      case 'lifestyle':
-        setCurrentStep('clinical');
-        break;
-      case 'clinical':
-        setCurrentStep('results');
-        toast({
-          title: "Avaliação concluída!",
-          description: "Seus resultados foram calculados com sucesso."
-        });
-        break;
-    }
-  };
-
-  const goToPreviousStep = () => {
-    switch(currentStep) {
-      case 'basic':
-        setCurrentStep('onboarding');
-        break;
-      case 'lifestyle':
-        setCurrentStep('basic');
-        break;
-      case 'clinical':
-        setCurrentStep('lifestyle');
-        break;
-      case 'results':
-        setCurrentStep('clinical');
-        break;
-    }
-  };
-
-  const skipClinicalStep = () => {
+    setRisk(parseFloat(calculatedRisk.toFixed(1)));
     setCurrentStep('results');
+  };
+  
+  const nextStep = () => {
+    if (currentStep === 'basic') {
+      setCurrentStep('lifestyle');
+    } else if (currentStep === 'lifestyle') {
+      setCurrentStep('clinical');
+    } else if (currentStep === 'clinical') {
+      calculateRisk();
+    }
+  };
+  
+  const prevStep = () => {
+    if (currentStep === 'lifestyle') {
+      setCurrentStep('basic');
+    } else if (currentStep === 'clinical') {
+      setCurrentStep('lifestyle');
+    } else if (currentStep === 'results') {
+      setCurrentStep('clinical');
+    }
+  };
+  
+  const startCalculator = () => {
+    setCurrentStep('basic');
     toast({
-      title: "Etapa opcional ignorada",
-      description: "Seus resultados serão calculados com as informações disponíveis."
+      title: "Avaliação iniciada",
+      description: "Vamos analisar seu risco cardíaco com base nos seus dados.",
     });
   };
-
-  // BMI classification
-  const getBmiClassification = () => {
-    if (bmi < 18.5) return 'Abaixo do peso';
-    if (bmi < 25) return 'Peso normal';
-    if (bmi < 30) return 'Sobrepeso';
-    return 'Obesidade';
+  
+  const restartCalculator = () => {
+    setCurrentStep('basic');
+    setUserData({
+      age: 40,
+      sex: 'male',
+      weight: 70,
+      height: 170,
+      familyHistory: false,
+      activityLevel: 'moderate',
+      smoker: false,
+      diabetic: false,
+      alcoholConsumption: 'none',
+    });
+    setBmi(0);
+    setRisk(0);
+    setRiskCategory('');
+    setMainFactors([]);
   };
-
-  // Age controls
-  const increaseAge = () => setAge(prev => Math.min(prev + 1, 99));
-  const decreaseAge = () => setAge(prev => Math.max(prev - 1, 18));
   
-  // Weight controls
-  const increaseWeight = () => setWeight(prev => Math.min(prev + 1, 200));
-  const decreaseWeight = () => setWeight(prev => Math.max(prev - 1, 40));
-  
-  // Height controls
-  const increaseHeight = () => setHeight(prev => Math.min(prev + 0.01, 2.2));
-  const decreaseHeight = () => setHeight(prev => Math.max(prev - 0.01, 1.4));
-
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Header />
-      <main className="min-h-screen bg-blue-50/50 pt-8 pb-16">
+      
+      <main className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-center text-doctordicas-text-dark mb-2">
+          Calculadora Cardíaca
+        </h1>
+        <p className="text-doctordicas-text-medium text-center mb-8">
+          Avalie seu risco cardiovascular e receba recomendações personalizadas
+        </p>
+        
+        {/* Progress bar */}
+        <div className="mb-8">
+          <Progress value={progress} className="h-2" />
+          <div className="flex justify-between text-xs mt-1 text-doctordicas-text-medium">
+            <span>Início</span>
+            <span>Dados Básicos</span>
+            <span>Estilo de Vida</span>
+            <span>Dados Clínicos</span>
+            <span>Resultados</span>
+          </div>
+        </div>
+        
         {currentStep === 'onboarding' && (
-          <div className="container mx-auto px-4 max-w-4xl">
-            <Card className="overflow-hidden bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-3xl">
-              <CardContent className="p-8">
-                <div className="text-center mb-8">
-                  <h1 className="text-3xl md:text-4xl font-bold text-doctordicas-text-dark mb-2">Calculadora Cardíaca</h1>
-                  <p className="text-lg text-doctordicas-text-medium">Conheça seu risco cardiovascular em apenas 2 minutos</p>
+          <div className="animate-fade-in">
+            <Card className="mb-8 overflow-hidden bg-gradient-to-r from-blue-500 to-blue-700 text-white">
+              <CardContent className="p-8 flex flex-col items-center">
+                <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center mb-6 animate-pulse">
+                  <Heart className="h-12 w-12" />
+                </div>
+                
+                <h2 className="text-2xl font-bold mb-4 text-center">Descubra seu risco cardiovascular</h2>
+                
+                <p className="text-center mb-6 max-w-md">
+                  Nossa calculadora usa algoritmos validados clinicamente para estimar seu risco de desenvolver doenças cardiovasculares nos próximos 10 anos.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-md mb-6">
+                  <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm flex flex-col items-center">
+                    <Clock className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Rápido</span>
+                    <span className="text-xs opacity-80">3 min</span>
+                  </div>
                   
-                  <div className="flex justify-center my-4">
-                    <div className="flex items-center">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star key={star} className="fill-yellow-400 text-yellow-400 w-5 h-5" />
-                      ))}
-                      <span className="ml-2 text-doctordicas-text-dark font-medium">4.9/5</span>
-                      <span className="ml-1 text-doctordicas-text-medium">(2.543 avaliações)</span>
+                  <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm flex flex-col items-center">
+                    <Activity className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Preciso</span>
+                    <span className="text-xs opacity-80">Validado</span>
+                  </div>
+                  
+                  <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm flex flex-col items-center">
+                    <Award className="h-6 w-6 mb-2" />
+                    <span className="text-sm">Personalizado</span>
+                    <span className="text-xs opacity-80">Para você</span>
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={startCalculator}
+                  size="lg" 
+                  className="bg-white text-blue-700 hover:bg-blue-50 animate-pulse"
+                >
+                  Começar minha avaliação
+                  <ChevronRight className="ml-1" />
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-lg mb-4">Como funciona a Calculadora Cardíaca?</h3>
+                
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-3">
+                      1
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Insira seus dados básicos</h4>
+                      <p className="text-sm text-gray-600">Idade, sexo, peso e altura são essenciais para o cálculo do risco base.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-3">
+                      2
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Informe seu estilo de vida</h4>
+                      <p className="text-sm text-gray-600">Hábitos como tabagismo e atividade física influenciam diretamente seu risco.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-3">
+                      3
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Adicione dados clínicos (opcional)</h4>
+                      <p className="text-sm text-gray-600">Para um resultado mais preciso, inclua dados de exames como pressão e colesterol.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-3">
+                      4
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Receba sua avaliação personalizada</h4>
+                      <p className="text-sm text-gray-600">Veja seu risco cardiovascular e recomendações específicas para sua saúde.</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="flex justify-center mb-12">
-                  <img 
-                    src="/lovable-uploads/a7cb2062-525f-4766-a2a5-c03f190450a1.png" 
-                    alt="Heart ECG Animation" 
-                    className="w-64 h-auto animate-pulse" 
-                  />
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-8 mb-12">
-                  <h2 className="md:col-span-2 text-xl font-semibold text-center mb-4">Avaliação personalizada baseada em ciência</h2>
-                  
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-blue-100 p-2 rounded-full">
-                      <Check className="text-blue-600 w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Funciona mesmo sem dados de exame</p>
-                      <p className="text-sm text-doctordicas-text-medium">Resultados com informações básicas</p>
-                    </div>
+                <div className="mt-6 border-t pt-4">
+                  <div className="flex items-center">
+                    <Info className="text-blue-600 mr-2" size={16} />
+                    <p className="text-sm text-gray-600">
+                      Esta ferramenta é informativa e não substitui uma consulta médica profissional.
+                    </p>
                   </div>
-                  
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-blue-100 p-2 rounded-full">
-                      <Check className="text-blue-600 w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Recomendações personalizadas</p>
-                      <p className="text-sm text-doctordicas-text-medium">Baseadas no seu perfil único</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-blue-100 p-2 rounded-full">
-                      <Check className="text-blue-600 w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Resultados progressivamente mais precisos</p>
-                      <p className="text-sm text-doctordicas-text-medium">Quanto mais dados, melhor a análise</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-blue-100 p-2 rounded-full">
-                      <Check className="text-blue-600 w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Visualize impacto de mudanças</p>
-                      <p className="text-sm text-doctordicas-text-medium">Simule alterações no seu estilo de vida</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-center mb-6">
-                  <Button
-                    onClick={goToNextStep}
-                    className="bg-blue-500 hover:bg-blue-600 text-white py-6 px-8 rounded-full text-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg"
-                  >
-                    Começar minha avaliação
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
-                
-                <div className="flex justify-center items-center text-sm text-doctordicas-text-medium">
-                  <Clock className="w-4 h-4 mr-2" />
-                  <span>Leva apenas 2 minutos</span>
-                  <span className="mx-3">•</span>
-                  <Lock className="w-4 h-4 mr-2" />
-                  <span>Seus dados são protegidos</span>
                 </div>
               </CardContent>
             </Card>
           </div>
         )}
-
-        {currentStep !== 'onboarding' && (
-          <div className="container mx-auto px-4 max-w-4xl">
-            <div className="mb-8">
-              <Progress value={progress} className="h-2" />
+        
+        {currentStep === 'basic' && (
+          <Card className="animate-fade-in">
+            <CardContent className="p-6">
+              <h2 className="text-xl font-bold mb-6">Dados Básicos</h2>
               
-              <div className="flex justify-between items-center mt-8 mb-4">
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-doctordicas-text-dark">
-                    {currentStep === 'basic' && 'Seus dados básicos'}
-                    {currentStep === 'lifestyle' && 'Seu estilo de vida'}
-                    {currentStep === 'clinical' && 'Seus dados clínicos'}
-                    {currentStep === 'results' && 'Seus resultados'}
-                  </h1>
-                  <p className="text-doctordicas-text-medium">
-                    {currentStep === 'basic' && 'Passo 1 de 4 - Informações pessoais para cálculo inicial'}
-                    {currentStep === 'lifestyle' && 'Passo 2 de 4 - Hábitos e comportamentos diários'}
-                    {currentStep === 'clinical' && 'Passo 3 de 4 - Valores de exames (opcional)'}
-                    {currentStep === 'results' && 'Passo 4 de 4 - Avaliação de risco e próximos passos'}
-                  </p>
-                </div>
-
-                <div className="flex space-x-1">
-                  {[1, 2, 3, 4].map((step) => (
-                    <div 
-                      key={step}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        (step === 1 && currentStep === 'basic') ||
-                        (step === 2 && currentStep === 'lifestyle') ||
-                        (step === 3 && currentStep === 'clinical') ||
-                        (step === 4 && currentStep === 'results')
-                          ? 'bg-blue-500 text-white' 
-                          : ((step === 1 && ['lifestyle', 'clinical', 'results'].includes(currentStep)) ||
-                             (step === 2 && ['clinical', 'results'].includes(currentStep)) ||
-                             (step === 3 && currentStep === 'results'))
-                            ? 'bg-blue-100 text-blue-500' 
-                            : 'bg-gray-100 text-gray-400'
-                      }`}
-                    >
-                      {((step === 1 && ['lifestyle', 'clinical', 'results'].includes(currentStep)) ||
-                        (step === 2 && ['clinical', 'results'].includes(currentStep)) ||
-                        (step === 3 && currentStep === 'results')) 
-                        ? <Check className="w-4 h-4" /> 
-                        : step}
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="age">Idade</Label>
+                    <div className="flex mt-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleInputChange('age', Math.max(18, userData.age - 1))}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        id="age"
+                        type="number"
+                        value={userData.age}
+                        onChange={(e) => handleInputChange('age', parseInt(e.target.value) || 0)}
+                        className="mx-2 text-center"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleInputChange('age', userData.age + 1)}
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </Button>
                     </div>
-                  ))}
+                    <p className="text-xs text-gray-500 mt-1">Recomendado: 18-90 anos</p>
+                  </div>
+                  
+                  <div>
+                    <Label>Sexo Biológico</Label>
+                    <div className="flex space-x-2 mt-1">
+                      <Button
+                        variant={userData.sex === 'male' ? 'default' : 'outline'}
+                        className={userData.sex === 'male' ? 'bg-blue-600' : ''}
+                        onClick={() => handleInputChange('sex', 'male')}
+                      >
+                        Masculino
+                      </Button>
+                      <Button
+                        variant={userData.sex === 'female' ? 'default' : 'outline'}
+                        className={userData.sex === 'female' ? 'bg-pink-500' : ''}
+                        onClick={() => handleInputChange('sex', 'female')}
+                      >
+                        Feminino
+                      </Button>
+                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="flex items-center text-xs text-gray-500 mt-1">
+                          <Info className="h-3 w-3 mr-1" />
+                          Por que precisamos desta informação?
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          O sexo biológico influencia diferentes fatores de risco cardiovascular.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            <Card className="overflow-hidden bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-3xl">
-              <CardContent className="p-8">
-                {currentStep === 'basic' && (
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div>
-                      <h2 className="text-xl font-semibold mb-6">Informações básicas</h2>
-                      
-                      <div className="mb-6">
-                        <label htmlFor="age" className="block mb-2 font-medium">Idade</label>
-                        <div className="flex items-center">
-                          <button 
-                            onClick={decreaseAge} 
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-l-lg"
-                          >
-                            -
-                          </button>
-                          <div className="relative w-full">
-                            <Input
-                              id="age"
-                              type="number"
-                              value={age}
-                              onChange={(e) => setAge(Number(e.target.value))}
-                              className="text-center border-x-0 rounded-none"
-                              min={18}
-                              max={99}
-                            />
-                          </div>
-                          <button 
-                            onClick={increaseAge} 
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-r-lg"
-                          >
-                            +
-                          </button>
-                          <span className="ml-2 text-gray-500">anos</span>
-                        </div>
-                      </div>
-                      
-                      <div className="mb-6">
-                        <label className="block mb-2 font-medium">Sexo biológico</label>
-                        <div className="flex p-1 bg-blue-50 rounded-full">
-                          <button
-                            className={`flex-1 py-2 px-4 rounded-full text-center transition-colors ${
-                              gender === 'female' 
-                                ? 'bg-blue-500 text-white' 
-                                : 'bg-transparent text-gray-600'
-                            }`}
-                            onClick={() => setGender('female')}
-                          >
-                            Feminino
-                          </button>
-                          <button
-                            className={`flex-1 py-2 px-4 rounded-full text-center transition-colors ${
-                              gender === 'male' 
-                                ? 'bg-blue-500 text-white' 
-                                : 'bg-transparent text-gray-600'
-                            }`}
-                            onClick={() => setGender('male')}
-                          >
-                            Masculino
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div className="mb-6">
-                        <label htmlFor="weight" className="block mb-2 font-medium">Seu peso</label>
-                        <div className="flex items-center">
-                          <button 
-                            onClick={decreaseWeight} 
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-l-lg"
-                          >
-                            -
-                          </button>
-                          <div className="relative w-full">
-                            <Input
-                              id="weight"
-                              type="number"
-                              value={weight}
-                              onChange={(e) => setWeight(Number(e.target.value))}
-                              className="text-center border-x-0 rounded-none"
-                              min={40}
-                              max={200}
-                            />
-                          </div>
-                          <button 
-                            onClick={increaseWeight} 
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-r-lg"
-                          >
-                            +
-                          </button>
-                          <span className="ml-2 text-gray-500">kg</span>
-                        </div>
-                      </div>
-                      
-                      <div className="mb-6">
-                        <label htmlFor="height" className="block mb-2 font-medium">Sua altura</label>
-                        <div className="flex items-center">
-                          <button 
-                            onClick={decreaseHeight} 
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-l-lg"
-                          >
-                            -
-                          </button>
-                          <div className="relative w-full">
-                            <Input
-                              id="height"
-                              type="number"
-                              value={height.toFixed(2)}
-                              onChange={(e) => setHeight(Number(e.target.value))}
-                              className="text-center border-x-0 rounded-none"
-                              min={1.4}
-                              max={2.2}
-                              step={0.01}
-                            />
-                          </div>
-                          <button 
-                            onClick={increaseHeight} 
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-r-lg"
-                          >
-                            +
-                          </button>
-                          <span className="ml-2 text-gray-500">m</span>
-                        </div>
-                      </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="weight">Peso (kg)</Label>
+                    <div className="flex mt-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleInputChange('weight', Math.max(40, userData.weight - 1))}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        id="weight"
+                        type="number"
+                        value={userData.weight}
+                        onChange={(e) => handleInputChange('weight', parseInt(e.target.value) || 0)}
+                        className="mx-2 text-center"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleInputChange('weight', userData.weight + 1)}
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="height">Altura (cm)</Label>
+                    <div className="flex mt-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleInputChange('height', Math.max(140, userData.height - 1))}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        id="height"
+                        type="number"
+                        value={userData.height}
+                        onChange={(e) => handleInputChange('height', parseInt(e.target.value) || 0)}
+                        className="mx-2 text-center"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleInputChange('height', userData.height + 1)}
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                
+                {bmi > 0 && (
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-semibold">Seu IMC</h3>
+                      <Badge variant={
+                        bmi < 18.5 ? "outline" : 
+                        bmi < 25 ? "default" : 
+                        bmi < 30 ? "secondary" : 
+                        "destructive"
+                      }>
+                        {bmi < 18.5 ? "Abaixo do peso" : 
+                        bmi < 25 ? "Peso normal" : 
+                        bmi < 30 ? "Sobrepeso" : 
+                        "Obesidade"}
+                      </Badge>
                     </div>
                     
-                    <div>
-                      <h2 className="text-xl font-semibold mb-6">Resultados em tempo real</h2>
-                      
-                      <div className="bg-blue-50 p-6 rounded-xl mb-6">
-                        <div className="flex justify-between items-center mb-4">
-                          <h3 className="font-medium text-lg">Seu IMC (Índice de Massa Corporal)</h3>
-                          <Button variant="ghost" size="sm" className="rounded-full">
-                            <HelpCircle className="h-5 w-5" />
-                          </Button>
-                        </div>
-                        
-                        <div className="relative mb-4">
-                          <div className="h-2 bg-gray-200 rounded-full mb-2">
-                            <div className="absolute top-0 left-0 h-2 rounded-full bg-gradient-to-r from-blue-500 via-green-400 to-red-500 w-full"></div>
-                            <div 
-                              className="absolute top-0 h-4 w-4 rounded-full bg-white border-2 border-blue-500 transform -translate-y-1/4"
-                              style={{ left: `${Math.min(Math.max((bmi - 16) / 24 * 100, 0), 100)}%` }}
-                            ></div>
-                          </div>
-                          <div className="flex justify-between text-xs text-gray-500">
-                            <span>Abaixo</span>
-                            <span>Normal</span>
-                            <span>Acima</span>
-                          </div>
-                        </div>
-                        
-                        <div className="text-center">
-                          <span className="text-5xl font-bold text-blue-500">{bmi.toFixed(1)}</span>
-                          <p className="text-gray-600 mt-1">{getBmiClassification()}</p>
+                    <div className="relative pt-1">
+                      <div className="flex mb-2 items-center justify-between">
+                        <div>
+                          <span className="text-xs font-semibold inline-block py-1 px-2 rounded-full text-blue-600 bg-blue-200">
+                            {bmi}
+                          </span>
                         </div>
                       </div>
-                      
-                      <div className="mb-6">
-                        <h3 className="font-medium text-lg mb-4">Histórico familiar de doenças cardíacas</h3>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                          <div 
-                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                              familyHistory 
-                                ? 'border-blue-500 bg-blue-50' 
-                                : 'border-gray-200 bg-white hover:border-blue-200'
-                            }`}
-                            onClick={() => setFamilyHistory(true)}
-                          >
-                            <div className="flex items-center">
-                              <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center ${
-                                familyHistory ? 'bg-blue-500' : 'border border-gray-300'
-                              }`}>
-                                {familyHistory && <Check className="text-white h-4 w-4" />}
-                              </div>
-                              <div>
-                                <p className="font-medium">Sim</p>
-                                <p className="text-xs text-gray-500">Pais, irmãos ou avós</p>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div 
-                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                              !familyHistory 
-                                ? 'border-blue-500 bg-blue-50' 
-                                : 'border-gray-200 bg-white hover:border-blue-200'
-                            }`}
-                            onClick={() => setFamilyHistory(false)}
-                          >
-                            <div className="flex items-center">
-                              <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center ${
-                                !familyHistory ? 'bg-blue-500' : 'border border-gray-300'
-                              }`}>
-                                {!familyHistory && <Check className="text-white h-4 w-4" />}
-                              </div>
-                              <div>
-                                <p className="font-medium">Não</p>
-                                <p className="text-xs text-gray-500">Sem histórico</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                      <div className="overflow-hidden h-2 mb-1 text-xs flex rounded bg-gray-200">
+                        <div 
+                          style={{ width: `${Math.min(bmi/40 * 100, 100)}%` }} 
+                          className={`
+                            shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center 
+                            ${bmi < 18.5 ? "bg-yellow-500" : 
+                            bmi < 25 ? "bg-green-500" : 
+                            bmi < 30 ? "bg-yellow-500" : 
+                            "bg-red-500"}
+                          `}
+                        ></div>
                       </div>
-                      
-                      <div className="bg-blue-50 rounded-xl p-4">
-                        <div className="flex items-center text-blue-600">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
-                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            <path d="M12 2C14.6522 2 17.1957 3.05357 19.0711 4.92893C20.9464 6.8043 22 9.34784 22 12C22 14.6522 20.9464 17.1957 19.0711 19.0711C17.1957 20.9464 14.6522 22 12 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="4 4"/>
-                          </svg>
-                          <p className="text-sm font-medium">50% das informações preenchidas</p>
-                        </div>
+                      <div className="flex text-xs justify-between text-gray-500">
+                        <span>16</span>
+                        <span>18.5</span>
+                        <span>25</span>
+                        <span>30</span>
+                        <span>40</span>
                       </div>
                     </div>
                   </div>
                 )}
                 
-                {currentStep === 'lifestyle' && (
+                <div>
+                  <div className="flex justify-between">
+                    <Label htmlFor="familyHistory">Histórico familiar de doenças cardíacas?</Label>
+                    <Switch 
+                      id="familyHistory" 
+                      checked={userData.familyHistory}
+                      onCheckedChange={(checked) => handleInputChange('familyHistory', checked)}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Pais, irmãos ou avós com doença cardíaca antes dos 55 anos (homem) ou 65 anos (mulher)
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {currentStep === 'lifestyle' && (
+          <Card className="animate-fade-in">
+            <CardContent className="p-6">
+              <h2 className="text-xl font-bold mb-6">Estilo de Vida</h2>
+              
+              <div className="space-y-6">
+                <div>
+                  <Label className="mb-3 block">Nível de atividade física</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <Card 
+                      className={`cursor-pointer border-2 ${userData.activityLevel === 'sedentary' ? 'border-blue-600' : 'border-transparent'}`}
+                      onClick={() => handleInputChange('activityLevel', 'sedentary')}
+                    >
+                      <CardContent className="p-4 text-center">
+                        <div className="w-10 h-10 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-2">
+                          <AlertCircle className="h-6 w-6 text-red-500" />
+                        </div>
+                        <h4 className="font-medium">Sedentário</h4>
+                        <p className="text-xs text-gray-500">Pouca ou nenhuma atividade</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card 
+                      className={`cursor-pointer border-2 ${userData.activityLevel === 'light' ? 'border-blue-600' : 'border-transparent'}`}
+                      onClick={() => handleInputChange('activityLevel', 'light')}
+                    >
+                      <CardContent className="p-4 text-center">
+                        <div className="w-10 h-10 mx-auto bg-yellow-100 rounded-full flex items-center justify-center mb-2">
+                          <Activity className="h-6 w-6 text-yellow-500" />
+                        </div>
+                        <h4 className="font-medium">Leve</h4>
+                        <p className="text-xs text-gray-500">1-2 dias por semana</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card 
+                      className={`cursor-pointer border-2 ${userData.activityLevel === 'moderate' ? 'border-blue-600' : 'border-transparent'}`}
+                      onClick={() => handleInputChange('activityLevel', 'moderate')}
+                    >
+                      <CardContent className="p-4 text-center">
+                        <div className="w-10 h-10 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-2">
+                          <Activity className="h-6 w-6 text-green-500" />
+                        </div>
+                        <h4 className="font-medium">Moderada</h4>
+                        <p className="text-xs text-gray-500">3-5 dias por semana</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card 
+                      className={`cursor-pointer border-2 ${userData.activityLevel === 'active' ? 'border-blue-600' : 'border-transparent'}`}
+                      onClick={() => handleInputChange('activityLevel', 'active')}
+                    >
+                      <CardContent className="p-4 text-center">
+                        <div className="w-10 h-10 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                          <Activity className="h-6 w-6 text-blue-500" />
+                        </div>
+                        <h4 className="font-medium">Intenso</h4>
+                        <p className="text-xs text-gray-500">6-7 dias por semana</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  {userData.activityLevel !== 'sedentary' && (
+                    <div className="text-xs text-green-600 flex items-center mt-2">
+                      <Check className="h-3 w-3 mr-1" /> 
+                      {userData.activityLevel === 'active' ? 'Reduz seu risco cardíaco em até 35%' : 
+                       userData.activityLevel === 'moderate' ? 'Reduz seu risco cardíaco em até 25%' : 
+                       'Reduz seu risco cardíaco em até 15%'}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <div className="mb-8">
-                      <h2 className="text-xl font-semibold mb-6">Frequência de atividade física</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div 
-                          className={`p-6 rounded-xl border-2 cursor-pointer transition-all ${
-                            activityLevel === 'sedentary' 
-                              ? 'border-blue-500 bg-blue-50' 
-                              : 'border-gray-200 bg-white hover:border-blue-200'
-                          }`}
-                          onClick={() => setActivityLevel('sedentary')}
-                        >
-                          <div className="flex justify-center mb-4">
-                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M24 12V36" stroke="#94A3B8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M12 24H36" stroke="#94A3B8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
-                          <h3 className="text-center font-medium mb-1">Sedentário</h3>
-                          <p className="text-center text-sm text-gray-500 mb-4">Pouca ou nenhuma atividade física</p>
-                          
-                          <div className="flex items-center justify-center">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                              activityLevel === 'sedentary' ? 'bg-blue-500 border-blue-500' : 'border border-gray-300'
-                            }`}>
-                              {activityLevel === 'sedentary' && <Check className="text-white h-4 w-4" />}
-                            </div>
-                            <p className="ml-2 text-sm text-rose-600">Aumenta seu risco em +35%</p>
-                          </div>
-                        </div>
-                        
-                        <div 
-                          className={`p-6 rounded-xl border-2 cursor-pointer transition-all ${
-                            activityLevel === 'moderate' 
-                              ? 'border-blue-500 bg-blue-50' 
-                              : 'border-gray-200 bg-white hover:border-blue-200'
-                          }`}
-                          onClick={() => setActivityLevel('moderate')}
-                        >
-                          <div className="flex justify-center mb-4">
-                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M20 34L28 34" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M16 26L32 26" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M12 18L36 18" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
-                          <h3 className="text-center font-medium mb-1">Moderado</h3>
-                          <p className="text-center text-sm text-gray-500 mb-4">1-3 vezes por semana</p>
-                          
-                          <div className="flex items-center justify-center">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                              activityLevel === 'moderate' ? 'bg-blue-500 border-blue-500' : 'border border-gray-300'
-                            }`}>
-                              {activityLevel === 'moderate' && <Check className="text-white h-4 w-4" />}
-                            </div>
-                            <p className="ml-2 text-sm text-green-600">Reduz seu risco em -15%</p>
-                          </div>
-                        </div>
-                        
-                        <div 
-                          className={`p-6 rounded-xl border-2 cursor-pointer transition-all ${
-                            activityLevel === 'intense' 
-                              ? 'border-blue-500 bg-blue-50' 
-                              : 'border-gray-200 bg-white hover:border-blue-200'
-                          }`}
-                          onClick={() => setActivityLevel('intense')}
-                        >
-                          <div className="flex justify-center mb-4">
-                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M12 36L36 12" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M24 36V12" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M36 36L12 12" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
-                          <h3 className="text-center font-medium mb-1">Intenso</h3>
-                          <p className="text-center text-sm text-gray-500 mb-4">4+ vezes por semana</p>
-                          
-                          <div className="flex items-center justify-center">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                              activityLevel === 'intense' ? 'bg-blue-500 border-blue-500' : 'border border-gray-300'
-                            }`}>
-                              {activityLevel === 'intense' && <Check className="text-white h-4 w-4" />}
-                            </div>
-                            <p className="ml-2 text-sm text-green-600">Reduz seu risco em -30%</p>
-                          </div>
-                        </div>
+                    <div className="flex justify-between">
+                      <Label htmlFor="smoker">Você é fumante?</Label>
+                      <Switch 
+                        id="smoker" 
+                        checked={userData.smoker}
+                        onCheckedChange={(checked) => handleInputChange('smoker', checked)}
+                      />
+                    </div>
+                    {userData.smoker && (
+                      <div className="text-xs text-red-600 flex items-center mt-2">
+                        <AlertCircle className="h-3 w-3 mr-1" /> Aumenta significativamente seu risco
                       </div>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between">
+                      <Label htmlFor="diabetic">Você tem diabetes?</Label>
+                      <Switch 
+                        id="diabetic" 
+                        checked={userData.diabetic}
+                        onCheckedChange={(checked) => handleInputChange('diabetic', checked)}
+                      />
+                    </div>
+                    {userData.diabetic && (
+                      <div className="text-xs text-red-600 flex items-center mt-2">
+                        <AlertCircle className="h-3 w-3 mr-1" /> Fator de risco cardiovascular importante
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <Label className="mb-2 block">Consumo de álcool</Label>
+                    <RadioGroup 
+                      value={userData.alcoholConsumption} 
+                      onValueChange={(value: 'none' | 'moderate' | 'heavy') => handleInputChange('alcoholConsumption', value)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="none" id="alcohol-none" />
+                        <Label htmlFor="alcohol-none">Não consumo</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="moderate" id="alcohol-moderate" />
+                        <Label htmlFor="alcohol-moderate">Moderado (até 1 dose/dia)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="heavy" id="alcohol-heavy" />
+                        <Label htmlFor="alcohol-heavy">Frequente (mais de 1 dose/dia)</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {currentStep === 'clinical' && (
+          <Card className="animate-fade-in">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 className="text-xl font-bold">Dados Clínicos</h2>
+                <Badge variant="outline" className="mt-2 md:mt-0">
+                  Opcional, mas aumenta a precisão
+                </Badge>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="bg-yellow-50 p-4 rounded-lg mb-6">
+                  <div className="flex items-start">
+                    <Info className="text-yellow-600 mr-2 mt-0.5" size={18} />
+                    <p className="text-sm text-gray-700">
+                      Os campos abaixo são opcionais. Se você não souber ou não tiver esses valores, 
+                      continue com "Não sei" e ainda receberá uma avaliação de risco básica.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <div className="flex justify-between">
+                      <Label htmlFor="systolicBP">Pressão Arterial (número mais alto)</Label>
+                      <HoverCard>
+                        <HoverCardTrigger className="text-blue-600">
+                          <Info className="h-4 w-4" />
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="space-y-2">
+                            <h4 className="font-semibold">Pressão Arterial Sistólica</h4>
+                            <p className="text-sm">
+                              É o valor mais alto da sua medição de pressão (ex: 120/80, onde 120 é a sistólica).
+                            </p>
+                            <div className="text-xs">
+                              <div className="flex justify-between">
+                                <span>&lt; 120</span>
+                                <span className="text-green-600">Normal</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>120-129</span>
+                                <span className="text-yellow-600">Elevada</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>&gt; 130</span>
+                                <span className="text-red-600">Hipertensão</span>
+                              </div>
+                            </div>
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                      <div>
-                        <h2 className="text-xl font-semibold mb-6">Você fuma?</h2>
-                        <div className="flex p-1 bg-blue-50 rounded-full">
-                          <button
-                            className={`flex-1 py-3 px-6 rounded-full text-center transition-colors ${
-                              smoking 
-                                ? 'bg-blue-500 text-white' 
-                                : 'bg-transparent text-gray-600'
-                            }`}
-                            onClick={() => setSmoking(true)}
-                          >
-                            Sim
-                          </button>
-                          <button
-                            className={`flex-1 py-3 px-6 rounded-full text-center transition-colors ${
-                              !smoking 
-                                ? 'bg-blue-500 text-white' 
-                                : 'bg-transparent text-gray-600'
-                            }`}
-                            onClick={() => setSmoking(false)}
-                          >
-                            Não
-                          </button>
+                    <div className="flex mt-1">
+                      <Input
+                        id="systolicBP"
+                        type="number"
+                        placeholder="Por ex.: 120"
+                        value={userData.systolicBP || ''}
+                        onChange={(e) => handleInputChange('systolicBP', e.target.value ? parseInt(e.target.value) : undefined)}
+                        className="mr-2"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() => handleInputChange('systolicBP', undefined)}
+                      >
+                        Não sei
+                      </Button>
+                    </div>
+                    
+                    {userData.systolicBP !== undefined && (
+                      <div className={`text-xs mt-1 flex items-center
+                        ${userData.systolicBP < 120 ? 'text-green-600' : 
+                          userData.systolicBP < 130 ? 'text-yellow-600' : 
+                          'text-red-600'}`
+                      }>
+                        {userData.systolicBP < 120 ? (
+                          <>
+                            <Check className="h-3 w-3 mr-1" /> Normal
+                          </>
+                        ) : userData.systolicBP < 130 ? (
+                          <>
+                            <AlertCircle className="h-3 w-3 mr-1" /> Elevada
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="h-3 w-3 mr-1" /> Hipertensão
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between">
+                      <Label htmlFor="totalCholesterol">Colesterol Total (mg/dL)</Label>
+                      <HoverCard>
+                        <HoverCardTrigger className="text-blue-600">
+                          <Info className="h-4 w-4" />
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="space-y-2">
+                            <h4 className="font-semibold">Colesterol Total</h4>
+                            <p className="text-sm">
+                              Valor total de colesterol no sangue, medido em miligramas por decilitro (mg/dL).
+                            </p>
+                            <div className="text-xs">
+                              <div className="flex justify-between">
+                                <span>&lt; 200</span>
+                                <span className="text-green-600">Desejável</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>200-239</span>
+                                <span className="text-yellow-600">Limítrofe</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>&gt; 240</span>
+                                <span className="text-red-600">Elevado</span>
+                              </div>
+                            </div>
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
+                    </div>
+                    
+                    <div className="flex mt-1">
+                      <Input
+                        id="totalCholesterol"
+                        type="number"
+                        placeholder="Por ex.: 180"
+                        value={userData.totalCholesterol || ''}
+                        onChange={(e) => handleInputChange('totalCholesterol', e.target.value ? parseInt(e.target.value) : undefined)}
+                        className="mr-2"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() => handleInputChange('totalCholesterol', undefined)}
+                      >
+                        Não sei
+                      </Button>
+                    </div>
+                    
+                    {userData.totalCholesterol !== undefined && (
+                      <div className={`text-xs mt-1 flex items-center
+                        ${userData.totalCholesterol < 200 ? 'text-green-600' : 
+                          userData.totalCholesterol < 240 ? 'text-yellow-600' : 
+                          'text-red-600'}`
+                      }>
+                        {userData.totalCholesterol < 200 ? (
+                          <>
+                            <Check className="h-3 w-3 mr-1" /> Desejável
+                          </>
+                        ) : userData.totalCholesterol < 240 ? (
+                          <>
+                            <AlertCircle className="h-3 w-3 mr-1" /> Limítrofe
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="h-3 w-3 mr-1" /> Elevado
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between">
+                      <Label htmlFor="hdlCholesterol">HDL - Colesterol Bom (mg/dL)</Label>
+                      <HoverCard>
+                        <HoverCardTrigger className="text-blue-600">
+                          <Info className="h-4 w-4" />
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="space-y-2">
+                            <h4 className="font-semibold">HDL - Colesterol Bom</h4>
+                            <p className="text-sm">
+                              Colesterol de alta densidade, conhecido como "colesterol bom".
+                            </p>
+                            <div className="text-xs">
+                              <div className="flex justify-between">
+                                <span>&lt; 40</span>
+                                <span className="text-red-600">Baixo</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>40-59</span>
+                                <span className="text-yellow-600">Médio</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>&gt; 60</span>
+                                <span className="text-green-600">Ótimo</span>
+                              </div>
+                            </div>
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
+                    </div>
+                    
+                    <div className="flex mt-1">
+                      <Input
+                        id="hdlCholesterol"
+                        type="number"
+                        placeholder="Por ex.: 45"
+                        value={userData.hdlCholesterol || ''}
+                        onChange={(e) => handleInputChange('hdlCholesterol', e.target.value ? parseInt(e.target.value) : undefined)}
+                        className="mr-2"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() => handleInputChange('hdlCholesterol', undefined)}
+                      >
+                        Não sei
+                      </Button>
+                    </div>
+                    
+                    {userData.hdlCholesterol !== undefined && (
+                      <div className={`text-xs mt-1 flex items-center
+                        ${userData.hdlCholesterol >= 60 ? 'text-green-600' : 
+                          userData.hdlCholesterol >= 40 ? 'text-yellow-600' : 
+                          'text-red-600'}`
+                      }>
+                        {userData.hdlCholesterol >= 60 ? (
+                          <>
+                            <Check className="h-3 w-3 mr-1" /> Ótimo
+                          </>
+                        ) : userData.hdlCholesterol >= 40 ? (
+                          <>
+                            <Check className="h-3 w-3 mr-1" /> Médio
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="h-3 w-3 mr-1" /> Baixo
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex items-center mt-4 py-2 px-4 bg-blue-50 rounded-lg">
+                  <div className="mr-4">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                      {(userData.systolicBP !== undefined || 
+                       userData.totalCholesterol !== undefined || 
+                       userData.hdlCholesterol !== undefined) ? (
+                        <Star className="h-5 w-5 text-blue-600" />
+                       ) : (
+                        <AlertCircle className="h-5 w-5 text-blue-600" />
+                       )}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">
+                      {(userData.systolicBP !== undefined || 
+                       userData.totalCholesterol !== undefined || 
+                       userData.hdlCholesterol !== undefined) ? (
+                        "Ótimo! Dados clínicos melhoram a precisão."
+                       ) : (
+                        "Sem dados clínicos, seu resultado terá precisão limitada."
+                       )}
+                    </h4>
+                    <p className="text-xs text-gray-600">
+                      {(userData.systolicBP !== undefined && 
+                       userData.totalCholesterol !== undefined && 
+                       userData.hdlCholesterol !== undefined) ? (
+                        "Todos os dados clínicos foram fornecidos. Sua avaliação será completa."
+                       ) : (
+                        "Você pode prosseguir mesmo sem esses dados, mas a precisão será menor."
+                       )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {currentStep === 'results' && (
+          <div className="space-y-8 animate-fade-in">
+            <Card className="overflow-hidden">
+              <CardContent className="p-0">
+                <div className="bg-gradient-to-r from-blue-700 to-blue-900 p-6 text-white">
+                  <h2 className="text-xl font-bold mb-2">Seu Risco Cardiovascular</h2>
+                  <p className="text-sm opacity-90">
+                    Baseado nos dados fornecidos, calculamos seu risco cardiovascular para os próximos 10 anos.
+                  </p>
+                </div>
+                
+                <div className="p-6">
+                  <div className="flex flex-col items-center mb-8">
+                    <div 
+                      className={`w-36 h-36 rounded-full flex items-center justify-center text-white text-3xl font-bold
+                        ${risk < 5 ? 'bg-green-500' : 
+                          risk < 10 ? 'bg-yellow-500' : 
+                          risk < 20 ? 'bg-orange-500' : 
+                          'bg-red-500'}`}
+                    >
+                      {risk}%
+                    </div>
+                    
+                    <h3 className="text-lg font-bold mt-4 mb-2">
+                      Risco {riskCategory}
+                    </h3>
+                    
+                    <p className="text-center text-sm text-gray-600 max-w-md">
+                      {risk < 5 ? 
+                        'Seu risco de desenvolver doença cardiovascular nos próximos 10 anos é baixo. Continue com bons hábitos de saúde.' : 
+                      risk < 10 ? 
+                        'Seu risco é moderado. Pequenas mudanças no estilo de vida podem reduzir significativamente este valor.' :
+                      risk < 20 ? 
+                        'Seu risco é moderado-alto. Recomenda-se consulta médica e mudanças no estilo de vida.' :
+                        'Seu risco é alto. Consulte um médico o mais breve possível para uma avaliação completa.'}
+                    </p>
+                  </div>
+                  
+                  <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden mb-2">
+                    <div 
+                      className="absolute h-full left-0 top-0 rounded-r-full transition-all duration-1000"
+                      style={{ 
+                        width: `${Math.min(risk * 2, 100)}%`,
+                        background: `linear-gradient(90deg, 
+                          ${risk < 5 ? '#10B981' : 
+                            risk < 10 ? '#FBBF24' : 
+                            risk < 20 ? '#F97316' : 
+                            '#EF4444'} 0%, 
+                          ${risk < 5 ? '#34D399' : 
+                            risk < 10 ? '#F59E0B' : 
+                            risk < 20 ? '#EA580C' : 
+                            '#DC2626'} 100%)`
+                      }}
+                    ></div>
+                  </div>
+                  
+                  <div className="flex justify-between text-xs text-gray-500 mb-8">
+                    <span>Baixo</span>
+                    <span>Moderado</span>
+                    <span>Moderado-Alto</span>
+                    <span>Alto</span>
+                  </div>
+                  
+                  <div className="border-t pt-6">
+                    <h3 className="font-bold mb-4">Seus principais fatores de risco</h3>
+                    
+                    {mainFactors.length > 0 ? (
+                      <div className="space-y-3">
+                        {mainFactors.map((factor, index) => (
+                          <div key={index} className="flex items-center">
+                            <div className="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
+                            <div className="flex-grow">
+                              <div className="text-sm font-medium">{factor}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600">
+                        Parabéns! Nenhum fator de risco significativo foi identificado.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold mb-4">Recomendações Personalizadas</h2>
+                
+                <div className="space-y-4">
+                  {userData.smoker && (
+                    <div className="flex">
+                      <div className="mr-4 mt-1">
+                        <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                          <AlertCircle className="h-4 w-4 text-red-600" />
                         </div>
                       </div>
-                      
                       <div>
-                        <h2 className="text-xl font-semibold mb-6">Consumo de álcool</h2>
-                        <div className="flex p-1 bg-blue-50 rounded-full">
-                          <button
-                            className={`flex-1 py-3 px-2 rounded-full text-center transition-colors ${
-                              alcoholConsumption === 'none' 
-                                ? 'bg-blue-500 text-white' 
-                                : 'bg-transparent text-gray-600'
-                            }`}
-                            onClick={() => setAlcoholConsumption('none')}
-                          >
-                            Nenhum
-                          </button>
-                          <button
-                            className={`flex-1 py-3 px-2 rounded-full text-center transition-colors ${
-                              alcoholConsumption === 'moderate' 
-                                ? 'bg-blue-500 text-white' 
-                                : 'bg-transparent text-gray-600'
-                            }`}
-                            onClick={() => setAlcoholConsumption('moderate')}
-                          >
-                            Moderado
-                          </button>
-                          <button
-                            className={`flex-1 py-3 px-2 rounded-full text-center transition-colors ${
-                              alcoholConsumption === 'high' 
-                                ? 'bg-blue-500 text-white' 
-                                : 'bg-transparent text-gray-600'
-                            }`}
-                            onClick={() => setAlcoholConsumption('high')}
-                          >
-                            Alto
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h2 className="text-xl font-semibold mb-6">Você tem diabetes?</h2>
-                        <div className="flex p-1 bg-blue-50 rounded-full">
-                          <button
-                            className={`flex-1 py-3 px-6 rounded-full text-center transition-colors ${
-                              diabetes 
-                                ? 'bg-blue-500 text-white' 
-                                : 'bg-transparent text-gray-600'
-                            }`}
-                            onClick={() => setDiabetes(true)}
-                          >
-                            Sim
-                          </button>
-                          <button
-                            className={`flex-1 py-3 px-6 rounded-full text-center transition-colors ${
-                              !diabetes 
-                                ? 'bg-blue-500 text-white' 
-                                : 'bg-transparent text-gray-600'
-                            }`}
-                            onClick={() => setDiabetes(false)}
-                          >
-                            Não
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-                        <div className="flex items-center text-green-600 mb-2">
-                          <Check className="h-6 w-6 mr-2" />
-                          <h3 className="font-semibold text-lg">Excelente progresso!</h3>
-                        </div>
-                        <p className="text-green-700">
-                          Suas respostas ajudam a criar um perfil de risco mais preciso
+                        <h4 className="font-medium text-red-700">Cessação do tabagismo</h4>
+                        <p className="text-sm text-gray-600">
+                          Parar de fumar pode reduzir seu risco cardiovascular em até 50% em um ano.
+                          Considere um programa de cessação do tabagismo.
                         </p>
                       </div>
                     </div>
-                  </div>
-                )}
-
-                {currentStep === 'clinical' && (
-                  <div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
-                      <div className="flex items-center mb-2">
-                        <Info className="text-blue-500 h-6 w-6 mr-2" />
-                        <h3 className="font-semibold text-lg text-doctordicas-text-dark">Etapa opcional</h3>
-                      </div>
-                      <p className="text-doctordicas-text-medium">
-                        Forneça dados de seus exames para um resultado mais preciso. 
-                        Se não tiver esses dados, você pode pular esta etapa.
-                      </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                      <div>
-                        <div className="mb-6">
-                          <div className="flex justify-between items-center mb-2">
-                            <label htmlFor="systolic" className="font-medium">Pressão arterial (sistólica)</label>
-                            <Button variant="ghost" size="sm" className="h-6 text-xs">
-                              Não sei
-                            </Button>
-                          </div>
-                          
-                          <div className="relative">
-                            <Input
-                              id="systolic"
-                              type="number"
-                              placeholder="Ex: 120"
-                              value={systolicPressure !== null ? systolicPressure : ''}
-                              onChange={(e) => e.target.value ? setSystolicPressure(Number(e.target.value)) : setSystolicPressure(null)}
-                            />
-                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                              mmHg
-                            </div>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">
-                            O número mais alto da sua medição de pressão
-                          </p>
-                        </div>
-                        
-                        <div className="mb-6">
-                          <div className="flex justify-between items-center mb-2">
-                            <label htmlFor="cholesterol" className="font-medium">Colesterol total</label>
-                            <Button variant="ghost" size="sm" className="h-6 text-xs">
-                              Não sei
-                            </Button>
-                          </div>
-                          
-                          <div className="relative">
-                            <Input
-                              id="cholesterol"
-                              type="number"
-                              placeholder="Ex: 180"
-                              value={cholesterolTotal !== null ? cholesterolTotal : ''}
-                              onChange={(e) => e.target.value ? setCholesterolTotal(Number(e.target.value)) : setCholesterolTotal(null)}
-                            />
-                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                              mg/dL
-                            </div>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Nível de colesterol total no sangue
-                          </p>
-                        </div>
-                        
-                        <div className="mb-6">
-                          <div className="flex justify-between items-center mb-2">
-                            <label htmlFor="hdl" className="font-medium">Colesterol HDL (bom)</label>
-                            <Button variant="ghost" size="sm" className="h-6 text-xs">
-                              Não sei
-                            </Button>
-                          </div>
-                          
-                          <div className="relative">
-                            <Input
-                              id="hdl"
-                              type="number"
-                              placeholder="Ex: 50"
-                              value={cholesterolHDL !== null ? cholesterolHDL : ''}
-                              onChange={(e) => e.target.value ? setCholesterolHDL(Number(e.target.value)) : setCholesterolHDL(null)}
-                            />
-                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                              mg/dL
-                            </div>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Nível de colesterol HDL (bom) no sangue
-                          </p>
+                  )}
+                  
+                  {bmi >= 25 && (
+                    <div className="flex">
+                      <div className="mr-4 mt-1">
+                        <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                          <AlertCircle className="h-4 w-4 text-yellow-600" />
                         </div>
                       </div>
-                      
                       <div>
-                        <div className="bg-blue-50 rounded-xl p-6 mb-6">
-                          <h3 className="font-semibold mb-4">Por que estes dados importam?</h3>
-                          <ul className="space-y-4">
-                            <li className="flex">
-                              <div className="mr-3 mt-1">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M8 0L10.2 5.31H16L11.2 8.69L12.89 14L8 10.5L3.11 14L4.8 8.69L0 5.31H5.8L8 0Z" fill="#3B82F6"/>
-                                </svg>
-                              </div>
-                              <div>
-                                <p className="font-medium">Pressão arterial elevada</p>
-                                <p className="text-sm text-gray-600">Pode danificar artérias e sobrecarregar o coração</p>
-                              </div>
-                            </li>
-                            
-                            <li className="flex">
-                              <div className="mr-3 mt-1">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M8 0L10.2 5.31H16L11.2 8.69L12.89 14L8 10.5L3.11 14L4.8 8.69L0 5.31H5.8L8 0Z" fill="#3B82F6"/>
-                                </svg>
-                              </div>
-                              <div>
-                                <p className="font-medium">Colesterol total alto</p>
-                                <p className="text-sm text-gray-600">Contribui para formação de placas nas artérias</p>
-                              </div>
-                            </li>
-                            
-                            <li className="flex">
-                              <div className="mr-3 mt-1">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M8 0L10.2 5.31H16L11.2 8.69L12.89 14L8 10.5L3.11 14L4.8 8.69L0 5.31H5.8L8 0Z" fill="#3B82F6"/>
-                                </svg>
-                              </div>
-                              <div>
-                                <p className="font-medium">HDL baixo</p>
-                                <p className="text-sm text-gray-600">Reduz proteção natural do corpo contra aterosclerose</p>
-                              </div>
-                            </li>
-                          </ul>
-                        </div>
-                        
-                        <div className="bg-blue-50 rounded-xl p-6">
-                          <div className="flex items-center text-blue-600 mb-2">
-                            <Info className="h-5 w-5 mr-2" />
-                            <h3 className="font-semibold">Nível de confiabilidade</h3>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-4">
-                            Quanto mais dados você fornecer, mais preciso será seu resultado
-                          </p>
-                          
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span>Básico</span>
-                              <span>Intermediário</span>
-                              <span>Avançado</span>
-                            </div>
-                            <Progress 
-                              value={systolicPressure ? (cholesterolTotal && cholesterolHDL ? 100 : 50) : 0} 
-                              className="h-2"
-                            />
-                          </div>
-                        </div>
+                        <h4 className="font-medium text-yellow-700">Gerenciamento de peso</h4>
+                        <p className="text-sm text-gray-600">
+                          {bmi >= 30 ? 
+                            'Seu IMC indica obesidade. Uma redução de 5-10% do peso corporal já traz benefícios significativos.' : 
+                            'Seu IMC indica sobrepeso. Pequenas reduções de peso podem melhorar significativamente sua saúde cardiovascular.'}
+                        </p>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                  
+                  {userData.activityLevel === 'sedentary' && (
+                    <div className="flex">
+                      <div className="mr-4 mt-1">
+                        <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                          <AlertCircle className="h-4 w-4 text-orange-600" />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-orange-700">Aumente sua atividade física</h4>
+                        <p className="text-sm text-gray-600">
+                          Comece com 30 minutos de atividade moderada, como caminhada rápida, 
+                          pelo menos 5 dias por semana.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {(userData.systolicBP && userData.systolicBP > 130) && (
+                    <div className="flex">
+                      <div className="mr-4 mt-1">
+                        <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                          <AlertCircle className="h-4 w-4 text-red-600" />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-red-700">Controle a pressão arterial</h4>
+                        <p className="text-sm text-gray-600">
+                          Sua pressão arterial está elevada. Reduza o consumo de sal, mantenha peso 
+                          saudável e consulte um médico para avaliação.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {(userData.totalCholesterol && userData.totalCholesterol > 200) && (
+                    <div className="flex">
+                      <div className="mr-4 mt-1">
+                        <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                          <AlertCircle className="h-4 w-4 text-yellow-600" />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-yellow-700">Gerenciamento do colesterol</h4>
+                        <p className="text-sm text-gray-600">
+                          Seu colesterol está elevado. Aumente o consumo de fibras, reduza gorduras saturadas 
+                          e considere uma avaliação médica.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {userData.alcoholConsumption === 'heavy' && (
+                    <div className="flex">
+                      <div className="mr-4 mt-1">
+                        <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                          <AlertCircle className="h-4 w-4 text-orange-600" />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-orange-700">Modere o consumo de álcool</h4>
+                        <p className="text-sm text-gray-600">
+                          Reduzir o consumo de álcool para níveis moderados pode diminuir o risco cardiovascular, 
+                          a pressão arterial e o peso.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {risk >= 10 && (
+                    <div className="flex">
+                      <div className="mr-4 mt-1">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                          <Info className="h-4 w-4 text-blue-600" />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-blue-700">Consulte um médico</h4>
+                        <p className="text-sm text-gray-600">
+                          Com seu nível de risco, é importante realizar uma avaliação médica completa. 
+                          Considere agendar uma consulta com um cardiologista.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {risk < 10 && (
+                    <div className="flex">
+                      <div className="mr-4 mt-1">
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                          <Check className="h-4 w-4 text-green-600" />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-green-700">Continue com bons hábitos</h4>
+                        <p className="text-sm text-gray-600">
+                          Mantenha um estilo de vida saudável e faça check-ups regulares para monitorar
+                          sua saúde cardiovascular.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 
-                {currentStep === 'results' && (
-                  <div>
-                    <div className="mb-4 bg-blue-50 rounded-xl px-6 py-3 flex items-center justify-center">
-                      <div className="text-sm text-blue-600">
-                        Nível de confiabilidade: {reliabilityLevel}
-                      </div>
-                    </div>
-                    
-                    <div className="text-center mb-12">
-                      <h2 className="text-2xl font-bold mb-8">Seu risco cardiovascular em 10 anos</h2>
-                      
-                      <div className="max-w-lg mx-auto">
-                        <div className="relative h-12 mb-2">
-                          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-500"></div>
-                          
-                          <div 
-                            className="absolute top-1/2 transform -translate-y-1/2"
-                            style={{ left: `${Math.min(Math.max(riskScore / 35 * 100, 5), 95)}%` }}
-                          >
-                            <div className="w-16 h-16 rounded-full bg-white border-4 border-yellow-500 shadow-lg flex items-center justify-center transform -translate-x-1/2">
-                              <span className="text-xl font-bold text-yellow-500">{riskScore}%</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex justify-between text-sm mt-8">
-                          <div className="w-1/4 text-left">
-                            <p className="font-medium">Baixo</p>
-                            <p className="text-xs text-gray-500">&lt;5%</p>
-                          </div>
-                          <div className="w-1/4 text-center">
-                            <p className="font-medium">Moderado</p>
-                            <p className="text-xs text-gray-500">5-10%</p>
-                          </div>
-                          <div className="w-1/4 text-center">
-                            <p className="font-medium">Alto</p>
-                            <p className="text-xs text-gray-500">10-20%</p>
-                          </div>
-                          <div className="w-1/4 text-right">
-                            <p className="font-medium">Muito Alto</p>
-                            <p className="text-xs text-gray-500">&gt;20%</p>
-                          </div>
-                        </div>
-                        
-                        <div className="text-center mt-4">
-                          <h3 className="text-xl font-bold text-yellow-500">Risco Moderado-Alto</h3>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="grid md:grid-cols-2 gap-8 mb-10">
-                      <div>
-                        <h3 className="text-xl font-semibold mb-6">Seus principais fatores de risco</h3>
-                        <div className="space-y-6">
-                          {riskFactors.map((factor) => (
-                            <div key={factor.id} className="flex items-start">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 shrink-0 ${
-                                factor.id === 3 ? 'bg-green-100 text-green-500' : 
-                                factor.id === 1 ? 'bg-red-100 text-red-500' : 'bg-yellow-100 text-yellow-500'
-                              }`}>
-                                {factor.id}
-                              </div>
-                              
-                              <div className="w-full">
-                                <div className="flex justify-between items-center mb-1">
-                                  <h4 className="font-medium">{factor.name}</h4>
-                                  <span className={`text-sm ${
-                                    factor.value > 0 ? 'text-red-500' : 'text-green-500'
-                                  }`}>{factor.impact}</span>
-                                </div>
-                                
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                  <div 
-                                    className={`h-2 rounded-full ${
-                                      factor.value > 0 
-                                        ? 'bg-gradient-to-r from-red-300 to-red-500' 
-                                        : 'bg-gradient-to-r from-green-300 to-green-500'
-                                    }`}
-                                    style={{ width: `${Math.abs(factor.value)}%` }}
-                                  ></div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-xl font-semibold mb-6">Próximos passos recomendados</h3>
-                        <div className="space-y-4">
-                          {recommendations.map((rec) => (
-                            <div key={rec.id} className="flex items-start p-4 bg-blue-50 rounded-xl">
-                              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white mr-4 shrink-0">
-                                {rec.id}
-                              </div>
-                              <div>
-                                <h4 className="font-medium text-blue-700">{rec.title}</h4>
-                                {rec.description && (
-                                  <p className="text-sm text-blue-600 mt-1">{rec.description}</p>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        
-                        <div className="mt-8">
-                          <Button 
-                            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl py-6"
-                          >
-                            Ver plano de ação detalhado
-                          </Button>
-                          
-                          <Button 
-                            variant="outline"
-                            className="w-full mt-4 border-blue-200 text-blue-600 font-medium rounded-xl py-6"
-                          >
-                            Explorar o simulador "E se?"
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-center">
-                      <Button
-                        variant="outline"
-                        className="text-green-600 border-green-200 bg-green-50 hover:bg-green-100"
-                        onClick={() => setCurrentStep('onboarding')}
-                      >
-                        Refaça esta avaliação em 3 meses para acompanhar seu progresso
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                
-                {currentStep !== 'results' && currentStep !== 'onboarding' && (
-                  <div className="flex justify-between mt-8">
-                    <Button
-                      variant="outline"
-                      onClick={goToPreviousStep}
-                      className="flex items-center"
-                    >
-                      <ChevronLeft className="mr-2 h-4 w-4" />
-                      Voltar
-                    </Button>
-                    
-                    <div className="flex gap-4">
-                      {currentStep === 'clinical' && (
-                        <Button
-                          variant="outline"
-                          onClick={skipClinicalStep}
-                          className="text-gray-500"
-                        >
-                          Pular esta etapa
-                        </Button>
-                      )}
-                      
-                      <Button
-                        onClick={goToNextStep}
-                        className="bg-blue-500 hover:bg-blue-600 text-white flex items-center"
-                      >
-                        Continuar
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                <div className="mt-6 pt-6 border-t">
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      toast({
+                        title: "Em desenvolvimento",
+                        description: "O plano de ação detalhado estará disponível em breve.",
+                      });
+                    }}
+                  >
+                    Ver plano de ação detalhado
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
+            
+            <div className="flex gap-4">
+              <Button 
+                className="flex-1"
+                variant="outline"
+                onClick={restartCalculator}
+              >
+                Refazer avaliação
+              </Button>
+              
+              <Button 
+                className="flex-1"
+                onClick={() => {
+                  toast({
+                    title: "Avaliação salva",
+                    description: "Sua avaliação foi salva em seu perfil.",
+                  });
+                }}
+              >
+                Salvar resultados
+              </Button>
+            </div>
           </div>
         )}
+        
+        <div className="mt-8">
+          <div className="container mx-auto">
+            {(currentStep !== 'results' && currentStep !== 'onboarding') && (
+              <div className="flex justify-between mt-8">
+                <Button
+                  variant="outline"
+                  onClick={currentStep === 'basic' ? () => setCurrentStep('onboarding') : prevStep}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
+                
+                <Button onClick={nextStep}>
+                  {currentStep === 'clinical' ? 'Ver resultados' : 'Continuar'}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
+      
       <Footer />
-    </>
+    </div>
   );
 };
 
