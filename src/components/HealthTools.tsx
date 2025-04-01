@@ -22,7 +22,7 @@ const HealthTools = () => {
       title: 'Calculadora Cardíaca',
       description: 'Avalie seu coração',
       action: 'Calcular risco cardíaco',
-      path: '#',
+      path: '/calculadora-cardiaca',
       color: 'red'
     },
     {
