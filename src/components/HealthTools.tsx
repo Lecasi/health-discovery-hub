@@ -31,7 +31,7 @@ const HealthTools = () => {
       title: 'Plano Nutricional',
       description: 'Dieta personalizada',
       action: 'Criar plano alimentar',
-      path: '#',
+      path: '/plano-nutricional',
       color: 'green'
     },
     {
