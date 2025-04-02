@@ -1,35 +1,67 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Check, MapPin, Bell, ShoppingCart, Star } from 'lucide-react';
+import { Checkbox } from "@/components/ui/checkbox";
+import { MapPin, Star } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface PharmacyListProps {
-  monitoredProducts: string[];
-  onToggleMonitor: (productName: string) => void;
+  toggleSelectedItem: (id: string) => void;
+  selectedItems: string[];
 }
 
-const PharmacyList = ({ monitoredProducts, onToggleMonitor }: PharmacyListProps) => {
-  const [selectedPharmacy, setSelectedPharmacy] = useState<number | null>(null);
+const PharmacyList = ({ toggleSelectedItem, selectedItems }: PharmacyListProps) => {
   const { toast } = useToast();
   
   // Dados mockados para demonstração
   const pharmacies = [
-    { id: 1, name: 'Farmácia Popular', logo: '🏥', rating: 4.8, distance: 0.7, inStock: true, price: 25.90, originalPrice: 32.50, discount: 20, partner: true, value: 9.5, delivery: '30min', streak: 3 },
-    { id: 2, name: 'Drogasil', logo: '💊', rating: 4.5, distance: 1.2, inStock: true, price: 28.50, originalPrice: 28.50, discount: 0, partner: true, value: 8.7, delivery: '1h', streak: 0 },
-    { id: 3, name: 'Pacheco', logo: '🏥', rating: 4.2, distance: 2.3, inStock: true, price: 23.75, originalPrice: 25.00, discount: 5, partner: false, value: 9.1, delivery: '45min', streak: 1 },
-    { id: 4, name: 'Raia', logo: '💊', rating: 4.6, distance: 0.9, inStock: false, price: 26.99, originalPrice: 26.99, discount: 0, partner: true, value: 8.9, delivery: '2h', streak: 0 },
-    { id: 5, name: 'Pague Menos', logo: '🏥', rating: 4.3, distance: 1.8, inStock: true, price: 22.99, originalPrice: 27.00, discount: 15, partner: true, value: 9.3, delivery: '1h', streak: 2 },
+    { 
+      id: '1', 
+      name: 'Drogasil',
+      initial: 'D',
+      rating: 4.9,
+      reviews: 543,
+      partner: true,
+      distance: 650,
+      price: 18.90,
+      originalPrice: 25.90,
+      discount: 27,
+      freeShipping: true,
+      sponsored: true 
+    },
+    { 
+      id: '2', 
+      name: 'FarmaSaúde',
+      initial: 'F',
+      rating: 4.8,
+      reviews: 412,
+      partner: true,
+      distance: 1200,
+      price: 19.90,
+      originalPrice: 23.50,
+      discount: 15,
+      freeShipping: false,
+      pickupOption: true,
+      sponsored: false
+    },
+    { 
+      id: '3', 
+      name: 'Ultrafarma',
+      initial: 'U',
+      rating: 4.7,
+      reviews: 325,
+      partner: true,
+      distance: 2100,
+      price: 21.50,
+      originalPrice: 24.99,
+      discount: 14,
+      shippingCost: 6.99,
+      sponsored: false
+    },
   ];
   
-  const sortedPharmacies = [...pharmacies].sort((a, b) => a.price - b.price);
-  const bestDeal = sortedPharmacies[0];
-  
-  const handlePurchase = (pharmacyId: number) => {
+  const handlePurchase = (pharmacyId: string) => {
     const pharmacy = pharmacies.find(p => p.id === pharmacyId);
     if (pharmacy) {
       toast({
@@ -39,144 +71,127 @@ const PharmacyList = ({ monitoredProducts, onToggleMonitor }: PharmacyListProps)
     }
   };
   
-  const selectPharmacy = (id: number) => {
-    setSelectedPharmacy(id === selectedPharmacy ? null : id);
-  };
-  
-  const displayRating = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    
+  const displayRating = (rating: number, reviews: number) => {
     return (
-      <span className="flex items-center">
-        {[...Array(fullStars)].map((_, i) => (
-          <Star key={i} className="text-yellow-500" size={14} fill="currentColor" />
-        ))}
-        {hasHalfStar && <Star className="text-yellow-500" size={14} fill="currentColor" />}
-        <span className="ml-1 text-xs text-gray-600">{rating}</span>
-      </span>
+      <div className="flex items-center">
+        <div className="flex mr-1">
+          {[...Array(5)].map((_, i) => (
+            <Star 
+              key={i} 
+              className="text-yellow-400" 
+              fill={i < Math.floor(rating) ? "currentColor" : "none"}
+              size={14}
+            />
+          ))}
+        </div>
+        <span className="text-xs text-gray-500">({reviews} avaliações)</span>
+      </div>
     );
   };
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Comparativo de Preços</CardTitle>
-        <CardDescription>Dipirona 500mg - 20 comprimidos</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Farmácia</TableHead>
-              <TableHead className="text-right">Preço</TableHead>
-              <TableHead className="hidden md:table-cell">Distância</TableHead>
-              <TableHead className="hidden md:table-cell">Disponibilidade</TableHead>
-              <TableHead className="hidden md:table-cell">Índice</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedPharmacies.map((pharmacy, index) => (
-              <TableRow 
-                key={pharmacy.id} 
-                className={`${pharmacy.id === bestDeal.id ? "bg-blue-50" : ""} ${pharmacy.id === selectedPharmacy ? "bg-gray-50" : ""} transition-colors cursor-pointer`}
-                onClick={() => selectPharmacy(pharmacy.id)}
-              >
-                <TableCell>
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-xl mr-2">
-                      {pharmacy.logo}
-                    </div>
-                    <div>
-                      <div className="font-medium flex items-center">
-                        {pharmacy.name}
-                        {index < 3 && (
-                          <Badge variant="outline" className={`ml-2 ${index === 0 ? 'border-doctordicas-blue text-doctordicas-blue' : index === 1 ? 'border-green-500 text-green-500' : 'border-yellow-500 text-yellow-500'}`}>
-                            {index + 1}º
-                          </Badge>
-                        )}
-                        {pharmacy.partner && (
-                          <span className="ml-2 bg-blue-100 text-doctordicas-blue text-xs px-2 py-0.5 rounded-full flex items-center">
-                            <Check size={10} className="mr-0.5" />
-                            Verificado
-                          </span>
-                        )}
+    <div className="space-y-6">
+      {pharmacies.map((pharmacy) => (
+        <div 
+          key={pharmacy.id} 
+          className={`rounded-lg border ${pharmacy.sponsored ? 'border-orange-200' : 'border-gray-200'} overflow-hidden`}
+        >
+          {pharmacy.sponsored && (
+            <div className="bg-orange-50 px-4 py-1 text-xs font-medium text-orange-600">
+              PATROCINADO
+            </div>
+          )}
+          
+          <div className="p-4">
+            <div className="flex">
+              {/* Checkbox */}
+              <div className="mr-4 flex items-start pt-1">
+                <Checkbox 
+                  checked={selectedItems.includes(pharmacy.id)} 
+                  onCheckedChange={() => toggleSelectedItem(pharmacy.id)}
+                  className="mt-1"
+                />
+              </div>
+              
+              {/* Pharmacy info */}
+              <div className="flex-1">
+                <div className="flex mb-3">
+                  {/* Avatar */}
+                  <div className={`w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mr-3`}>
+                    {pharmacy.initial}
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-bold text-lg">{pharmacy.name}</h3>
+                        {displayRating(pharmacy.rating, pharmacy.reviews)}
                       </div>
-                      <div className="hidden md:block">{displayRating(pharmacy.rating)}</div>
+                      
+                      {pharmacy.partner && (
+                        <Badge className="bg-green-100 text-green-600 border-green-200 whitespace-nowrap">
+                          Parceiro Oficial
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center mt-1">
+                      <Badge className="bg-blue-100 text-blue-600 border-blue-200 flex items-center gap-1">
+                        <MapPin size={12} />
+                        {pharmacy.distance < 1000 
+                          ? `${pharmacy.distance}m` 
+                          : `${(pharmacy.distance / 1000).toFixed(1)}km`}
+                      </Badge>
                     </div>
                   </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="font-bold text-doctordicas-text-dark">
-                    R$ {pharmacy.price.toFixed(2)}
-                    {pharmacy.discount > 0 && (
-                      <span className="ml-2 text-xs font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">
-                        -{pharmacy.discount}%
-                      </span>
-                    )}
-                    {pharmacy.discount > 0 && (
-                      <div className="text-xs line-through text-gray-400">
-                        R$ {pharmacy.originalPrice.toFixed(2)}
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Preço:</div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold">R$ {pharmacy.price.toFixed(2)}</span>
+                      <div className="flex items-center">
+                        <span className="text-sm text-gray-400 line-through mr-1">
+                          R$ {pharmacy.originalPrice.toFixed(2)}
+                        </span>
+                        <Badge className="bg-orange-100 text-orange-600 border-orange-200">
+                          {pharmacy.discount}% OFF
+                        </Badge>
                       </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    {pharmacy.freeShipping && (
+                      <Badge className="bg-green-50 text-green-600 border-green-200">
+                        Frete Grátis
+                      </Badge>
                     )}
-                  </div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <div className="flex items-center">
-                    <MapPin size={14} className="mr-1 text-gray-500" />
-                    <span>{pharmacy.distance} km</span>
-                  </div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <span className={`px-2 py-1 rounded-full text-xs ${pharmacy.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                    {pharmacy.inStock ? "Em estoque" : "Indisponível"}
-                  </span>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <div className="flex items-center">
-                    <Progress value={pharmacy.value * 10} className="h-1.5 w-16 mr-2" />
-                    <span className={`font-medium ${pharmacy.value >= 9 ? "text-green-600" : pharmacy.value >= 8 ? "text-yellow-600" : "text-red-600"}`}>
-                      {pharmacy.value.toFixed(1)}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2 justify-end">
+                    {pharmacy.pickupOption && (
+                      <Badge className="bg-blue-50 text-blue-600 border-blue-200">
+                        Retirada
+                      </Badge>
+                    )}
+                    {pharmacy.shippingCost && (
+                      <Badge className="bg-red-50 text-red-600 border-red-200">
+                        R$ {pharmacy.shippingCost.toFixed(2)}
+                      </Badge>
+                    )}
                     <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleMonitor("Dipirona 500mg");
-                      }}
+                      onClick={() => handlePurchase(pharmacy.id)}
+                      className={`${pharmacy.id === '1' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-white text-blue-600 border border-blue-300 hover:bg-blue-50'}`}
                     >
-                      <Bell size={14} className="md:mr-1" />
-                      <span className="hidden md:inline">
-                        {monitoredProducts.includes("Dipirona 500mg") ? "Monitorando" : "Monitorar"}
-                      </span>
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      disabled={!pharmacy.inStock}
-                      variant={pharmacy.id === bestDeal.id ? "default" : "outline"}
-                      className={pharmacy.id === bestDeal.id ? "bg-doctordicas-blue hover:bg-doctordicas-blue/90" : ""}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePurchase(pharmacy.id);
-                      }}
-                    >
-                      <ShoppingCart size={14} className="md:mr-1" />
-                      <span className="hidden md:inline">Comprar</span>
+                      Comprar
                     </Button>
                   </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 };
 

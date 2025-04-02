@@ -7,11 +7,11 @@ const PriceHistoryChart = () => {
   const priceHistory = [
     { date: '01/05', price: 28.99 },
     { date: '08/05', price: 27.50 },
-    { date: '15/05', price: 27.99 },
-    { date: '22/05', price: 25.99 },
-    { date: '29/05', price: 24.50 },
-    { date: '05/06', price: 23.99 },
-    { date: '12/06', price: 24.99 },
+    { date: '15/05', price: 25.99 },
+    { date: '22/05', price: 24.99 },
+    { date: '29/05', price: 23.50 },
+    { date: '05/06', price: 19.90 },
+    { date: '12/06', price: 18.90 },
   ];
   
   return (
@@ -22,14 +22,17 @@ const PriceHistoryChart = () => {
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
-        <YAxis domain={['dataMin - 1', 'dataMax + 1']} />
+        <YAxis 
+          domain={['dataMin - 1', 'dataMax + 1']}
+          tickFormatter={(value) => `R$ ${value}`} 
+        />
         <Tooltip 
           content={({ active, payload }) => {
             if (active && payload && payload.length) {
               return (
-                <div className="bg-white p-2 border rounded shadow-sm">
+                <div className="bg-white p-3 border rounded-lg shadow-sm">
                   <p className="font-medium">{`Data: ${payload[0].payload.date}`}</p>
-                  <p className="text-doctordicas-blue">{`Preço: R$ ${payload[0].value}`}</p>
+                  <p className="text-blue-600 font-medium">{`Preço: R$ ${payload[0].value}`}</p>
                 </div>
               );
             }
@@ -39,8 +42,10 @@ const PriceHistoryChart = () => {
         <Line 
           type="monotone" 
           dataKey="price" 
-          stroke="#2563eb" 
-          activeDot={{ r: 8 }} 
+          stroke="#3B82F6" 
+          strokeWidth={2}
+          activeDot={{ r: 8, fill: '#2563EB', stroke: '#fff', strokeWidth: 2 }} 
+          dot={{ r: 4, fill: '#3B82F6', stroke: '#fff', strokeWidth: 2 }}
           name="Preço (R$)" 
         />
       </LineChart>
