@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, AlertCircle, Search, ShieldCheck, RotateCcw } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +19,8 @@ const DiagnosticCard = () => {
     'Braços', 'Pernas', 'Geral'
   ];
 
+  const WEBHOOK_URL = 'https://webhook.doctorhub.cloud/webhook/e4881378-270f-4482-9ff6-f358860da7cd';
+
   useEffect(() => {
     // Simulate increasing diagnoses count
     const interval = setInterval(() => {
@@ -27,7 +30,41 @@ const DiagnosticCard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleDiagnose = () => {
+  const sendToWebhook = async (data: { bodyPart: string; symptoms: string }) => {
+    try {
+      console.log('Enviando dados para webhook:', data);
+      
+      const response = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'diagnostic_request',
+          data: {
+            bodyPart: data.bodyPart,
+            symptoms: data.symptoms,
+            timestamp: new Date().toISOString(),
+            userId: 'user_' + Date.now() // ID temporário do usuário
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Resposta do webhook:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('Erro ao enviar para webhook:', error);
+      throw error;
+    }
+  };
+
+  const handleDiagnose = async () => {
     if (!selectedBodyPart || !symptoms) {
       setFeedback({
         type: 'error',
@@ -39,24 +76,55 @@ const DiagnosticCard = () => {
     setIsSubmitting(true);
     setFeedback(null);
     
-    // Show feedback
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
       setFeedback({
         type: 'success',
-        message: 'Redirecionando para o sistema de diagnóstico...'
+        message: 'Enviando dados para análise da IA...'
       });
-      
-      // Store the input in localStorage to use it on the diagnosis page
+
+      // Enviar dados para o webhook
+      const webhookResponse = await sendToWebhook({
+        bodyPart: selectedBodyPart,
+        symptoms: symptoms
+      });
+
+      setFeedback({
+        type: 'success',
+        message: 'Dados processados pela IA. Redirecionando...'
+      });
+
+      // Store the webhook response and input data in localStorage
       localStorage.setItem('diagnosticSymptoms', symptoms);
       localStorage.setItem('diagnosticBodyPart', selectedBodyPart);
+      localStorage.setItem('webhookResponse', JSON.stringify(webhookResponse));
       
-      // Redirect to diagnostic page
+      toast({
+        title: "Diagnóstico processado",
+        description: "Sua consulta foi analisada pela nossa IA avançada.",
+        duration: 5000,
+      });
+
+      // Redirect to diagnostic page after a short delay
       setTimeout(() => {
         navigate('/diagnostico');
-      }, 1000);
+      }, 1500);
       
-    }, 1000);
+    } catch (error) {
+      console.error('Erro no diagnóstico:', error);
+      setFeedback({
+        type: 'error',
+        message: 'Erro ao processar diagnóstico. Tente novamente.'
+      });
+      
+      toast({
+        title: "Erro no diagnóstico",
+        description: "Não foi possível processar sua consulta. Tente novamente.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   const resetForm = () => {
