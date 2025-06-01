@@ -21,6 +21,7 @@ import UserInsightCollector from '@/components/UserInsightCollector';
 import HeroSection from '@/components/HeroSection';
 import QuickAccessCards from '@/components/QuickAccessCards';
 import MainDiagnosticSection from '@/components/MainDiagnosticSection';
+import ContentCategories from '@/components/ContentCategories';
 
 const Index = () => {
   const [showWelcome, setShowWelcome] = useState(true);
@@ -77,13 +78,14 @@ const Index = () => {
       
       <main>
         <HeroSection />
-        <QuickAccessCards />
-        <MainDiagnosticSection />
+        <ContentCategories />
         <TrendingTopics />
         <HealthNews />
         <NutritionSection />
         <MentalHealthSection />
         <FeaturedContent />
+        <QuickAccessCards />
+        <MainDiagnosticSection />
         <Community />
         <StatisticsBanner />
       </main>
