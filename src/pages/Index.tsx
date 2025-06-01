@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -19,6 +18,9 @@ import NutritionSection from '@/components/NutritionSection';
 import MentalHealthSection from '@/components/MentalHealthSection';
 import TrendingTopics from '@/components/TrendingTopics';
 import UserInsightCollector from '@/components/UserInsightCollector';
+import HeroSection from '@/components/HeroSection';
+import QuickAccessCards from '@/components/QuickAccessCards';
+import MainDiagnosticSection from '@/components/MainDiagnosticSection';
 
 const Index = () => {
   const [showWelcome, setShowWelcome] = useState(true);
@@ -73,30 +75,14 @@ const Index = () => {
       
       <UserInsightCollector />
       
-      <main className="pt-4">
-        <SearchBar />
-        <AIAssistant />
-        
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-          <div className="grid md:grid-cols-2 gap-6">
-            <DiagnosticCard />
-            <ConsultationCard />
-          </div>
-          <div className="text-center mt-4">
-            <Link 
-              to="/diagnostico" 
-              className="inline-flex items-center text-doctordicas-blue hover:text-blue-700 transition-colors"
-            >
-              Ver sistema de diagnóstico completo →
-            </Link>
-          </div>
-        </div>
-        
-        <HealthNews />
+      <main>
+        <HeroSection />
+        <QuickAccessCards />
+        <MainDiagnosticSection />
         <TrendingTopics />
+        <HealthNews />
         <NutritionSection />
         <MentalHealthSection />
-        <HealthTools />
         <FeaturedContent />
         <Community />
         <StatisticsBanner />
@@ -104,6 +90,7 @@ const Index = () => {
       
       <Footer />
       <ScrollToTop />
+      <AIAssistant />
     </div>
   );
 };
