@@ -20,6 +20,7 @@ import ComparadorPrecos from "./pages/ComparadorPrecos";
 import CardiacCalculator from "./pages/CardiacCalculator";
 import MedicineComparisonPage from "./pages/MedicineComparisonPage";
 import NutritionalPlanPage from "./pages/NutritionalPlanPage";
+import SpecialtiesPage from "./pages/SpecialtiesPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/perfil/*" element={<ProfilePage />} />
             <Route path="/busca" element={<SearchResultsPage />} />
             <Route path="/consulta" element={<ConsultationPage />} />
+            <Route path="/especialidades" element={<SpecialtiesPage />} />
             <Route path="/exames" element={<ExamInterpreterPage />} />
             <Route path="/comparador" element={<ComparadorPrecos />} />
             <Route path="/medicamentos" element={<MedicineComparisonPage />} />

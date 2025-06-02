@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Calendar, CheckCircle, Shield, Users, Star } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { Link } from 'react-router-dom';
 
 const ConsultationCard = () => {
   const [onlineDoctors, setOnlineDoctors] = useState(72);
@@ -67,7 +68,7 @@ const ConsultationCard = () => {
       </div>
       
       <p className="text-doctordicas-text-medium text-sm mb-5">
-        Primeira consulta com preço especial
+        Clínico geral imediato ou especialista agendado
       </p>
       
       <div className="flex items-center gap-2 mb-3 text-doctordicas-text-dark">
@@ -91,6 +92,7 @@ const ConsultationCard = () => {
       </div>
       
       <div className="space-y-3">
+        {/* Clínico Geral - Imediato */}
         <button 
           onClick={handleBooking}
           disabled={isBooking || isBooked}
@@ -111,10 +113,10 @@ const ConsultationCard = () => {
           ) : (
             <>
               <span className="relative">
-                AGENDAR CONSULTA
+                CLÍNICO GERAL - AGORA
                 {isHovered && (
                   <span className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-doctordicas-green text-white text-xs px-2 py-1 rounded whitespace-nowrap animate-fade-in">
-                    Primeira consulta R$49,90
+                    Atendimento imediato R$49,90
                     <svg className="absolute top-full left-1/2 transform -translate-x-1/2" width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M0 0L5 5L10 0H0Z" fill="#16A34A" />
                     </svg>
@@ -125,12 +127,15 @@ const ConsultationCard = () => {
           )}
         </button>
         
-        <button className={`w-full bg-white text-doctordicas-text-dark border py-3 rounded-lg font-medium transition-all duration-300 flex justify-center items-center gap-2 ${
-          isHovered ? 'border-doctordicas-blue text-doctordicas-blue' : 'border-gray-200 hover:bg-gray-50'
-        }`}>
-          <Calendar size={18} className={`transition-colors duration-300 ${isHovered ? 'text-doctordicas-blue' : 'text-doctordicas-blue'}`} />
-          <span>AGENDAR PARA DEPOIS</span>
-        </button>
+        {/* Especialistas - Agendamento */}
+        <Link to="/especialidades">
+          <button className={`w-full bg-doctordicas-blue text-white py-3 rounded-lg font-medium transition-all duration-300 flex justify-center items-center gap-2 hover:bg-blue-600 ${
+            isHovered ? 'shadow-md' : ''
+          }`}>
+            <Calendar size={18} />
+            <span>ESCOLHER ESPECIALISTA</span>
+          </button>
+        </Link>
       </div>
     </div>
   );
